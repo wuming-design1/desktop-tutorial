@@ -1,5 +1,60 @@
-# Welcome to GitHub Desktop!
+# 运动场人流监测与预约系统
 
-This is your README. READMEs are where you can communicate what your project is and how to use it.
+基于 Three.js 的 3D 运动场实时人流监测与场地预约系统，纯前端单文件实现。
 
-Write your name on line 6, save it, and then head back to GitHub Desktop.
+## 功能特性
+
+### 3D 场景
+- 跑道（红色椭圆形跑道 + 白色分道线）
+- 足球场（绿色草坪 + 中线/中圈标记）
+- 看台（灰色阶梯式观众席 + 顶棚）
+- 篮球场（橙色场地 + 篮架）
+- 健身区（蓝色区域 + 健身器材模型）
+- 室内体育馆（半透明玻璃顶 + 6个室内场地）
+- 状态指示灯（绿/黄/红三色，根据人流密度自动变化）
+- 80-150 个 3D 简笔人物，带浮动呼吸动画
+- 热力图叠加层（基于区域人流密度动态渲染）
+- 漂浮粒子特效
+
+### 监测面板
+- **左上 - 人流监测**：总人数、密度等级、各区域分解统计
+- **右上 - 环境监测**：气温、湿度、风速、地表温度（>40°C 警告）
+- **运动推荐**：4档温度对应着装建议 + 运动类型推荐
+
+### 预约系统
+- **右下 - 场地预约**：6个室内场地，16:00-22:00 时间轴
+- 可选时长（1小时/2小时）
+- 可视化已预约/可预约时段
+
+### API 架构
+- `StadiumAPIService` 类，`useRealAPI` 开关切换真实/模拟数据
+- 真实 API 失败自动降级为模拟数据
+
+## 使用方式
+
+直接在浏览器中打开 `index.html` 即可运行。
+
+如需连接真实 API，修改代码中的 `useRealAPI` 参数：
+
+```javascript
+const api = new StadiumAPIService(true); // 启用真实 API
+```
+
+默认 API 端点：
+- `GET /api/v1/stadium/crowd` - 人流数据
+- `GET /api/v1/stadium/weather` - 天气数据
+- `GET /api/v1/stadium/reservations` - 预约数据
+
+## 操作说明
+
+- 鼠标拖拽旋转视角 / 滚轮缩放
+- 悬停人物查看所在区域
+- 点击可预约时段选择场地和时间
+- 选择时长后点击"确认预约"
+
+## 技术栈
+
+- Three.js 0.160 (CDN)
+- 纯 JavaScript (ES Module)
+- CSS Glassmorphism 设计
+- OrbitControls 轨道控制
