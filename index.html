@@ -3,85 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>运动场人流监测与预约系统</title>
+<title>STADIUM CTRL // 运动场人流监测</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg: #050510;
+  --cyan: #00f0ff;
+  --magenta: #ff2d78;
+  --amber: #ffb700;
+  --lime: #00ff87;
+  --panel-bg: rgba(4,6,18,0.72);
+  --border: rgba(0,240,255,0.2);
+  --text: #c8d6e5;
+  --muted: #5a6a8a;
+  --font-display: 'Orbitron', 'Noto Sans SC', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{overflow:hidden;background:#0a0a1a;font-family:'PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif}
+body{
+  overflow:hidden;background:var(--bg);
+  font-family:var(--font-body);color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,240,255,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,240,255,0.02) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  opacity:0.4;
+}
 #canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 canvas{display:block}
 
+/* ── Panel Base ── */
 .panel{
-  position:fixed;z-index:10;color:#fff;
-  background:rgba(15,20,40,0.55);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:18px;padding:18px 20px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  position:fixed;z-index:10;color:var(--text);
+  background:var(--panel-bg);
+  backdrop-filter:blur(24px) saturate(140%);
+  -webkit-backdrop-filter:blur(24px) saturate(140%);
+  border:1px solid var(--border);
+  padding:20px 22px;
   pointer-events:auto;
-  transition:all 0.3s ease;
+  clip-path:polygon(
+    0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px)
+  );
+  transition:border-color 0.4s, background 0.4s;
 }
-.panel:hover{background:rgba(15,20,40,0.7);border-color:rgba(255,255,255,0.22)}
+.panel::before{
+  content:'';position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity 0.4s;
+  background:radial-gradient(ellipse at top left,var(--cyan),transparent 60%),
+             radial-gradient(ellipse at bottom right,var(--magenta),transparent 60%);
+}
+.panel:hover{background:rgba(4,6,18,0.85);border-color:rgba(0,240,255,0.45)}
+.panel:hover::before{opacity:0.06}
 
-.panel-title{font-size:14px;font-weight:700;margin-bottom:12px;letter-spacing:0.5px;
-  display:flex;align-items:center;gap:8px;
-  padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1)}
-.panel-title .dot{width:8px;height:8px;border-radius:50%;display:inline-block;animation:pulse 2s infinite}
-.dot.green{background:#4ade80;box-shadow:0 0 8px #4ade80}
-.dot.yellow{background:#facc15;box-shadow:0 0 8px #facc15}
-.dot.red{background:#ef4444;box-shadow:0 0 8px #ef4444}
-.dot.gray{background:#6b7280;box-shadow:0 0 4px #6b7280}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.panel-title{
+  font-family:var(--font-display);font-size:11px;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:12px;border-bottom:1px solid rgba(0,240,255,0.15);
+  color:var(--cyan);
+}
+.panel-title .dot{width:7px;height:7px;display:inline-block;position:relative}
+.panel-title .dot::after{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  animation:glowPulse 2s ease-in-out infinite;
+}
+.dot.green{background:var(--lime)} .dot.green::after{background:var(--lime);opacity:0.4}
+.dot.yellow{background:var(--amber)} .dot.yellow::after{background:var(--amber);opacity:0.4}
+.dot.red{background:var(--magenta)} .dot.red::after{background:var(--magenta);opacity:0.4}
+.dot.gray{background:var(--muted)} .dot.gray::after{background:var(--muted);opacity:0.2}
+@keyframes glowPulse{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.8);opacity:0}}
 
-#panel-crowd{top:20px;left:20px;width:300px;max-height:calc(100vh - 40px);overflow-y:auto}
-#panel-crowd .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
-#panel-crowd .stat-value{font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
-#panel-crowd .density-bar{height:5px;border-radius:3px;margin-top:3px;transition:width 0.5s}
-#panel-crowd .zone-item{margin-bottom:8px}
-#panel-crowd .zone-name{font-size:12px;color:#94a3b8;margin-bottom:2px}
+/* ── Crowd Panel ── */
+#panel-crowd{top:22px;left:22px;width:320px;max-height:calc(100vh - 44px);overflow-y:auto}
+#panel-crowd .stat-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0}
+#panel-crowd .stat-label{font-size:12px;color:var(--muted);font-family:var(--font-body)}
+#panel-crowd .stat-value{
+  font-family:var(--font-mono);font-size:28px;font-weight:400;
+  color:var(--cyan);text-shadow:0 0 12px rgba(0,240,255,0.4);
+  font-variant-numeric:tabular-nums;letter-spacing:0.05em;
+}
+#panel-crowd .density-bar-wrap{
+  height:4px;background:rgba(255,255,255,0.06);
+  margin:4px 0 2px;position:relative;overflow:hidden;
+}
+#panel-crowd .density-bar{
+  height:100%;transition:width 0.6s cubic-bezier(0.22,1,0.36,1);
+  position:relative;
+}
+#panel-crowd .density-bar::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:20px;
+  background:linear-gradient(to right,transparent,currentColor);
+  opacity:0.5;
+}
+#panel-crowd .density-level{
+  font-family:var(--font-mono);font-size:10px;margin:4px 0 10px;
+  letter-spacing:0.08em;text-transform:uppercase;
+}
+#panel-crowd .zone-item{margin-bottom:10px}
+#panel-crowd .zone-name{font-size:11px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between}
+#panel-crowd .zone-name span:last-child{font-family:var(--font-mono);color:var(--text)}
 
-#panel-weather{top:20px;right:20px;width:280px}
-#panel-weather .weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px}
-#panel-weather .weather-item{background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;text-align:center}
-#panel-weather .weather-item .label{color:#94a3b8;font-size:11px;margin-bottom:4px}
-#panel-weather .weather-item .value{font-size:18px;font-weight:700}
-#panel-weather .warning{color:#ef4444;animation:pulse 1.5s infinite}
-#panel-weather .recommend{margin-top:10px;padding:10px;background:rgba(255,255,255,0.05);border-radius:10px;font-size:12px;line-height:1.6}
-#panel-weather .recommend .rec-title{font-weight:700;color:#60a5fa;margin-bottom:4px}
+/* ── Weather Panel ── */
+#panel-weather{top:22px;right:22px;width:290px}
+#panel-weather .weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#panel-weather .weather-item{
+  background:rgba(0,240,255,0.03);border:1px solid rgba(0,240,255,0.08);
+  padding:12px 10px;text-align:center;
+  clip-path:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+  transition:border-color 0.3s,background 0.3s;
+}
+#panel-weather .weather-item:hover{background:rgba(0,240,255,0.06);border-color:rgba(0,240,255,0.2)}
+#panel-weather .weather-item .label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;font-family:var(--font-display)}
+#panel-weather .weather-item .value{font-family:var(--font-mono);font-size:18px;font-weight:400;color:var(--amber)}
+#panel-weather .warning{color:var(--magenta)!important;animation:warningBlink 1s ease-in-out infinite;text-shadow:0 0 10px rgba(255,45,120,0.6)}
+@keyframes warningBlink{0%,100%{opacity:1}50%{opacity:0.5}}
+#panel-weather .recommend{
+  margin-top:10px;padding:12px;font-size:11px;line-height:1.7;
+  border:1px solid rgba(0,240,255,0.1);
+  background:rgba(0,240,255,0.02);
+  clip-path:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+}
+#panel-weather .recommend .rec-title{font-family:var(--font-display);font-size:10px;color:var(--cyan);letter-spacing:0.12em;margin-bottom:6px;text-transform:uppercase}
 
-#panel-reserve{bottom:20px;right:20px;width:340px;max-height:350px;overflow-y:auto}
-#panel-reserve .venue-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12px}
-#panel-reserve .venue-name{width:50px;font-weight:700;flex-shrink:0}
-#panel-reserve .timeline{display:flex;gap:2px;flex:1}
-#panel-reserve .time-slot{width:28px;height:22px;border-radius:4px;cursor:pointer;font-size:10px;
+/* ── Reserve Panel ── */
+#panel-reserve{bottom:22px;right:22px;width:360px;max-height:360px;overflow-y:auto}
+#panel-reserve .venue-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(0,240,255,0.06)}
+#panel-reserve .venue-name{width:42px;font-family:var(--font-mono);font-size:11px;color:var(--cyan);flex-shrink:0;letter-spacing:0.05em}
+#panel-reserve .timeline{display:flex;gap:3px;flex:1}
+#panel-reserve .time-slot{
+  width:32px;height:24px;cursor:pointer;font-family:var(--font-mono);font-size:10px;
   display:flex;align-items:center;justify-content:center;transition:all 0.2s;
-  background:rgba(255,255,255,0.08);color:#94a3b8}
-#panel-reserve .time-slot.available{background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.25)}
-#panel-reserve .time-slot.available:hover{background:rgba(74,222,128,0.3);transform:scale(1.1)}
-#panel-reserve .time-slot.booked{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.25);cursor:not-allowed}
-#panel-reserve .time-slot.selected{background:rgba(96,165,250,0.3);color:#60a5fa;border:1px solid rgba(96,165,250,0.5);box-shadow:0 0 8px rgba(96,165,250,0.3)}
-#panel-reserve .time-label{display:flex;justify-content:space-between;padding:0 54px 4px;font-size:10px;color:#64748b}
-#panel-reserve .reserve-action{margin-top:10px;display:flex;gap:8px;align-items:center}
-#panel-reserve .reserve-action select{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:6px 10px;font-size:12px;outline:none}
-#panel-reserve .reserve-action select option{background:#1e293b;color:#fff}
-#panel-reserve .btn-reserve{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s}
-#panel-reserve .btn-reserve:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,0.4)}
-#panel-reserve .btn-reserve:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+  background:rgba(255,255,255,0.04);color:var(--muted);
+  clip-path:polygon(0 3px,3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px));
+}
+#panel-reserve .time-slot.available{background:rgba(0,255,135,0.1);color:var(--lime);border:1px solid rgba(0,255,135,0.2)}
+#panel-reserve .time-slot.available:hover{background:rgba(0,255,135,0.22);transform:scale(1.12);box-shadow:0 0 10px rgba(0,255,135,0.25)}
+#panel-reserve .time-slot.booked{background:rgba(255,45,120,0.08);color:var(--magenta);border:1px solid rgba(255,45,120,0.15);cursor:not-allowed}
+#panel-reserve .time-slot.selected{background:rgba(0,240,255,0.18);color:var(--cyan);border:1px solid rgba(0,240,255,0.4);box-shadow:0 0 12px rgba(0,240,255,0.3),inset 0 0 8px rgba(0,240,255,0.1)}
+#panel-reserve .time-label{
+  display:flex;justify-content:space-between;padding:0 52px 6px;
+  font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:0.05em;
+}
+#panel-reserve .reserve-action{margin-top:12px;display:flex;gap:8px;align-items:center}
+#panel-reserve .reserve-action select{
+  background:rgba(0,0,0,0.5);color:var(--text);border:1px solid var(--border);
+  padding:8px 12px;font-size:12px;font-family:var(--font-mono);outline:none;cursor:pointer;
+  clip-path:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+}
+#panel-reserve .reserve-action select option{background:#0a0a1e;color:var(--text)}
+#panel-reserve .btn-reserve{
+  background:transparent;color:var(--cyan);border:1px solid rgba(0,240,255,0.4);
+  padding:8px 18px;font-family:var(--font-display);font-size:10px;font-weight:700;
+  letter-spacing:0.1em;cursor:pointer;transition:all 0.25s;
+  clip-path:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+}
+#panel-reserve .btn-reserve:hover:not(:disabled){
+  background:rgba(0,240,255,0.12);box-shadow:0 0 16px rgba(0,240,255,0.3),inset 0 0 12px rgba(0,240,255,0.08);
+  transform:translateY(-1px);
+}
+#panel-reserve .btn-reserve:disabled{opacity:0.3;cursor:not-allowed}
 
-#legend{position:fixed;bottom:20px;left:20px;z-index:10;display:flex;align-items:center;gap:6px;
-  background:rgba(15,20,40,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;font-size:11px;color:#94a3b8}
-#legend .gradient{width:120px;height:10px;border-radius:5px;
-  background:linear-gradient(to right,#2563eb,#22c55e,#eab308,#ef4444)}
+/* ── Legend ── */
+#legend{
+  position:fixed;bottom:22px;left:22px;z-index:10;display:flex;align-items:center;gap:8px;
+  background:var(--panel-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid var(--border);padding:10px 14px;font-size:10px;color:var(--muted);
+  font-family:var(--font-display);letter-spacing:0.08em;
+  clip-path:polygon(0 4px,4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px));
+}
+#legend .gradient{width:100px;height:6px;
+  background:linear-gradient(to right,#0066ff,#00e5ff,#00ff87,#ffb700,#ff2d78)}
+#legend .gradient+span{color:#0066ff}#legend span:last-child{color:#ff2d78}
 
-#tooltip{position:fixed;z-index:20;pointer-events:none;opacity:0;transition:opacity 0.15s;
-  background:rgba(15,20,40,0.9);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;
-  border:1px solid rgba(255,255,255,0.15);white-space:nowrap}
+/* ── Tooltip ── */
+#tooltip{
+  position:fixed;z-index:20;pointer-events:none;opacity:0;transition:opacity 0.15s;
+  background:rgba(4,6,18,0.95);color:var(--cyan);padding:8px 14px;font-size:11px;
+  font-family:var(--font-mono);border:1px solid rgba(0,240,255,0.3);
+  box-shadow:0 0 16px rgba(0,240,255,0.15);white-space:nowrap;
+  clip-path:polygon(0 3px,3px 0,calc(100% - 3px) 0,100% 3px,100% calc(100% - 3px),calc(100% - 3px) 100%,3px 100%,0 calc(100% - 3px));
+}
 
+/* ── Accent Lines ── */
+#accent-line{
+  position:fixed;top:0;right:338px;width:1px;height:100vh;z-index:5;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,rgba(0,240,255,0.15) 20%,rgba(0,240,255,0.15) 80%,transparent);
+}
+#accent-dot{
+  position:fixed;top:50%;right:336px;z-index:5;pointer-events:none;
+  width:5px;height:5px;background:var(--cyan);box-shadow:0 0 8px var(--cyan),0 0 20px var(--cyan);
+  animation:accentFloat 3s ease-in-out infinite;
+}
+@keyframes accentFloat{0%,100%{transform:translateY(-50%)}50%{transform:translateY(calc(-50% - 10px))}}
+
+/* ── Responsive ── */
 @media(max-width:768px){
-  #panel-crowd{width:260px;top:10px;left:10px;padding:12px 14px}
-  #panel-weather{width:240px;top:10px;right:10px;padding:12px 14px}
-  #panel-reserve{width:calc(100vw - 20px);bottom:10px;right:10px;padding:12px 14px}
-  #legend{bottom:10px;left:10px;padding:8px 10px}
+  #accent-line,#accent-dot{display:none}
+  #panel-crowd{width:calc(100vw - 20px);top:10px;left:10px;padding:14px}
+  #panel-weather{width:calc(100vw - 20px);top:auto;bottom:380px;right:10px;padding:14px}
+  #panel-reserve{width:calc(100vw - 20px);bottom:10px;right:10px;padding:14px;max-height:280px}
+  #legend{bottom:auto;top:10px;right:10px;left:auto;padding:8px 10px}
 }
 </style>
 </head>
@@ -89,43 +221,46 @@ canvas{display:block}
 
 <div id="canvas-container"></div>
 
+<div id="accent-line"></div>
+<div id="accent-dot"></div>
+
 <div id="panel-crowd" class="panel">
-  <div class="panel-title"><span class="dot green"></span>人流监测</div>
-  <div class="stat-row"><span>运动场总人数</span><span class="stat-value" id="total-crowd">0</span></div>
-  <div class="density-bar" id="total-density-bar" style="width:0%;background:#4ade80"></div>
-  <div style="font-size:11px;color:#94a3b8;margin:4px 0 8px">密度等级: <span id="density-level" style="font-weight:700;color:#4ade80">低</span></div>
-  <div class="zone-item"><div class="zone-name">足球场</div><div class="density-bar" id="bar-football" style="width:0%;background:#4ade80"></div></div>
-  <div class="zone-item"><div class="zone-name">跑道</div><div class="density-bar" id="bar-track" style="width:0%;background:#4ade80"></div></div>
-  <div class="zone-item"><div class="zone-name">篮球场</div><div class="density-bar" id="bar-basketball" style="width:0%;background:#4ade80"></div></div>
-  <div class="zone-item"><div class="zone-name">健身区</div><div class="density-bar" id="bar-fitness" style="width:0%;background:#4ade80"></div></div>
-  <div class="zone-item"><div class="zone-name">室内体育馆</div><div class="density-bar" id="bar-indoor" style="width:0%;background:#4ade80"></div></div>
+  <div class="panel-title"><span class="dot green"></span>CROWD MONITOR</div>
+  <div class="stat-row"><span class="stat-label">运动场总人数</span><span class="stat-value" id="total-crowd">0</span></div>
+  <div class="density-bar-wrap"><div class="density-bar" id="total-density-bar" style="width:0%"></div></div>
+  <div class="density-level">密度等级 // <span id="density-level" style="color:var(--lime)">LOW</span></div>
+  <div class="zone-item"><div class="zone-name"><span>足球场</span><span>--</span></div><div class="density-bar-wrap"><div class="density-bar" id="bar-football" style="width:0%"></div></div></div>
+  <div class="zone-item"><div class="zone-name"><span>跑道</span><span>--</span></div><div class="density-bar-wrap"><div class="density-bar" id="bar-track" style="width:0%"></div></div></div>
+  <div class="zone-item"><div class="zone-name"><span>篮球场</span><span>--</span></div><div class="density-bar-wrap"><div class="density-bar" id="bar-basketball" style="width:0%"></div></div></div>
+  <div class="zone-item"><div class="zone-name"><span>健身区</span><span>--</span></div><div class="density-bar-wrap"><div class="density-bar" id="bar-fitness" style="width:0%"></div></div></div>
+  <div class="zone-item"><div class="zone-name"><span>室内体育馆</span><span>--</span></div><div class="density-bar-wrap"><div class="density-bar" id="bar-indoor" style="width:0%"></div></div></div>
 </div>
 
 <div id="panel-weather" class="panel">
-  <div class="panel-title"><span class="dot yellow"></span>环境监测 · 重庆</div>
+  <div class="panel-title"><span class="dot yellow"></span>ENVIROMENT // 重庆</div>
   <div class="weather-grid">
-    <div class="weather-item"><div class="label">气温</div><div class="value" id="val-temp">28°C</div></div>
-    <div class="weather-item"><div class="label">湿度</div><div class="value" id="val-humidity">55%</div></div>
-    <div class="weather-item"><div class="label">风速</div><div class="value" id="val-wind">3m/s</div></div>
-    <div class="weather-item"><div class="label">地表温度</div><div class="value" id="val-surface">32°C</div></div>
+    <div class="weather-item"><div class="label">TEMP</div><div class="value" id="val-temp">28°C</div></div>
+    <div class="weather-item"><div class="label">HUMIDITY</div><div class="value" id="val-humidity">55%</div></div>
+    <div class="weather-item"><div class="label">WIND</div><div class="value" id="val-wind">3m/s</div></div>
+    <div class="weather-item"><div class="label">SURFACE</div><div class="value" id="val-surface">32°C</div></div>
   </div>
-  <div class="recommend"><div class="rec-title">今日运动推荐</div><div id="rec-text">加载中...</div></div>
+  <div class="recommend"><div class="rec-title">RECOMMENDATION</div><div id="rec-text">加载中...</div></div>
 </div>
 
 <div id="panel-reserve" class="panel">
-  <div class="panel-title"><span class="dot green"></span>场地预约</div>
+  <div class="panel-title"><span class="dot green"></span>VENUE BOOKING</div>
   <div class="time-label"><span>16:00</span><span>17:00</span><span>18:00</span><span>19:00</span><span>20:00</span><span>21:00</span></div>
   <div id="venue-list"></div>
   <div class="reserve-action">
     <select id="duration-select"><option value="1">1小时</option><option value="2">2小时</option></select>
     <button class="btn-reserve" id="btn-reserve" disabled>确认预约</button>
-    <span id="reserve-info" style="font-size:11px;color:#94a3b8"></span>
+    <span id="reserve-info" style="font-size:11px;color:var(--muted)"></span>
   </div>
 </div>
 
 <div id="legend">
-  <span>热力图</span><span class="gradient"></span>
-  <span style="color:#2563eb">低</span><span style="color:#ef4444">高</span>
+  <span>HEATMAP</span><span class="gradient"></span>
+  <span>LOW</span><span style="color:var(--muted);margin:0 2px">/</span><span>HIGH</span>
 </div>
 
 <div id="tooltip"></div>
@@ -759,15 +894,15 @@ let selectedVenue = null;
 let selectedHour = null;
 
 function getDensityColor(ratio) {
-  if (ratio < 0.3) return '#4ade80';
-  if (ratio < 0.6) return '#facc15';
-  return '#ef4444';
+  if (ratio < 0.3) return 'var(--lime)';
+  if (ratio < 0.6) return 'var(--amber)';
+  return 'var(--magenta)';
 }
 
 function getDensityLevel(ratio) {
-  if (ratio < 0.3) return '低';
-  if (ratio < 0.6) return '中';
-  return '高';
+  if (ratio < 0.3) return 'LOW';
+  if (ratio < 0.6) return 'MED';
+  return 'HIGH';
 }
 
 function updateCrowdPanel(data) {
@@ -783,6 +918,7 @@ function updateCrowdPanel(data) {
   levelEl.style.color = getDensityColor(ratio);
 
   const zoneMax = { football: 35, track: 45, basketball: 25, fitness: 20, indoor: 35 };
+  const zoneNames = { football: '足球场', track: '跑道', basketball: '篮球场', fitness: '健身区', indoor: '室内体育馆' };
   Object.entries(data.zones).forEach(([zone, count]) => {
     const bar = document.getElementById('bar-' + zone);
     if (bar) {
@@ -790,6 +926,9 @@ function updateCrowdPanel(data) {
       bar.style.width = (r * 100) + '%';
       bar.style.background = getDensityColor(r);
     }
+    // Update zone count in span
+    const zoneRow = document.querySelector(`#bar-${zone}`)?.closest('.zone-item')?.querySelector('.zone-name span:last-child');
+    if (zoneRow) zoneRow.textContent = count;
   });
 }
 
@@ -806,7 +945,7 @@ function updateWeatherPanel(data) {
     surfaceEl.classList.remove('warning');
   }
   const rec = getSportsRecommendation(data.temp, data.surfaceTemp);
-  document.getElementById('rec-text').innerHTML = `${rec.icon} ${rec.text}<br><span style="color:#94a3b8;font-size:11px">建议着装: ${rec.clothing}</span>`;
+  document.getElementById('rec-text').innerHTML = `${rec.icon} ${rec.text}<br><span style="color:var(--muted);font-size:11px">建议着装: ${rec.clothing}</span>`;
 }
 
 function updateReservationPanel(data) {
@@ -870,10 +1009,16 @@ document.getElementById('btn-reserve').addEventListener('click', () => {
   // Flash effect
   const btn = document.getElementById('btn-reserve');
   btn.textContent = '已预约!';
-  btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+  btn.style.background = 'rgba(0,255,135,0.15)';
+  btn.style.borderColor = 'rgba(0,255,135,0.6)';
+  btn.style.color = 'var(--lime)';
+  btn.style.boxShadow = '0 0 20px rgba(0,255,135,0.3)';
   setTimeout(() => {
     btn.textContent = '确认预约';
-    btn.style.background = 'linear-gradient(135deg,#3b82f6,#6366f1)';
+    btn.style.background = 'transparent';
+    btn.style.borderColor = 'rgba(0,240,255,0.4)';
+    btn.style.color = 'var(--cyan)';
+    btn.style.boxShadow = 'none';
     btn.disabled = true;
   }, 1500);
 });
