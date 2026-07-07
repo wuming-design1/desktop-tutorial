@@ -102,7 +102,7 @@ canvas{display:block}
 </div>
 
 <div id="panel-weather" class="panel">
-  <div class="panel-title"><span class="dot yellow"></span>环境监测</div>
+  <div class="panel-title"><span class="dot yellow"></span>环境监测 · 重庆</div>
   <div class="weather-grid">
     <div class="weather-item"><div class="label">气温</div><div class="value" id="val-temp">28°C</div></div>
     <div class="weather-item"><div class="label">湿度</div><div class="value" id="val-humidity">55%</div></div>
@@ -165,8 +165,37 @@ class StadiumAPIService {
     return this._fetchOrSimulate('/crowd', () => simulateCrowdData());
   }
 
+  // Fetch real weather data for Chongqing (latitude 29.43, longitude 106.91) from Open-Meteo
   async fetchWeatherData() {
-    return this._fetchOrSimulate('/weather', () => simulateWeatherData());
+    if (!this.useRealAPI) return simulateWeatherData();
+    try {
+      // Open-Meteo API: current weather + current hour solar radiation
+      const url = 'https://api.open-meteo.com/v1/forecast?latitude=29.43&longitude=106.91&current=temperature_2m,relative_humidity_2m,wind_speed_10m&hourly=shortwave_radiation&timezone=Asia/Shanghai&forecast_hours=1';
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) throw new Error(`Open-Meteo API ${res.status}`);
+      const data = await res.json();
+      // Extract data
+      const temp = Math.round(data.current.temperature_2m);
+      const humidity = data.current.relative_humidity_2m;
+      const windKmh = data.current.wind_speed_10m;
+      const wind = Math.round(windKmh / 3.6 * 10) / 10; // convert km/h to m/s
+      const solarRadiation = data.hourly.shortwave_radiation[0] || 300;
+      // Calculate surface temperature: temp + humidity + wind(-) + solar radiation
+      const surfaceTemp = temp + (humidity * 0.05) + (wind * -0.3) + (solarRadiation * 0.015);
+      const result = {
+        temp,
+        humidity,
+        wind,
+        solarRadiation,
+        surfaceTemp: Math.round(surfaceTemp),
+        timestamp: Date.now()
+      };
+      console.log('[API] 已获取重庆实时天气数据:', result);
+      return result;
+    } catch (e) {
+      console.warn(`[API] Open-Meteo 请求失败，降级为模拟数据:`, e.message);
+      return simulateWeatherData();
+    }
   }
 
   async fetchReservations() {
@@ -850,7 +879,7 @@ document.getElementById('btn-reserve').addEventListener('click', () => {
 });
 
 // ==================== API Service ====================
-const api = new StadiumAPIService(false);
+const api = new StadiumAPIService(true);
 
 // ==================== Data Refresh ====================
 async function refreshData() {
@@ -967,7 +996,8 @@ setInterval(() => {
 }, 5000);
 
 console.log('🏟️  运动场人流监测与预约系统已启动');
-console.log('   StadiumAPIService: useRealAPI=false (模拟数据模式)');
+console.log('   StadiumAPIService: useRealAPI=true (真实天气API模式 - 重庆)');
+console.log('   天气数据来自 Open-Meteo 免费API');
 console.log('   3D场景: 跑道+足球场+看台+篮球场+健身区+室内体育馆');
 console.log('   面板: 人流监测 | 环境监测 | 场地预约');
 </script>
