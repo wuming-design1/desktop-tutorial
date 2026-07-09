@@ -60,6 +60,34 @@ async function comparePassword(password: string, hash: string): Promise<boolean>
   return bcrypt.compareSync(password, hash)
 }
 
+// 预创建测试账号
+function seedTestUser() {
+  const users = getUsers()
+  if (!users['admin@demo.com']) {
+    const bcrypt = require('bcryptjs')
+    const now = new Date().toISOString()
+    users['admin@demo.com'] = {
+      user: {
+        id: 'admin_test_001',
+        username: 'Admin',
+        email: 'admin@demo.com',
+        role: 'admin',
+        createdAt: now,
+        lastLoginAt: now,
+        settings: {
+          theme: 'system',
+          refreshInterval: 60,
+          cardLayout: ['metrics', 'summary', 'timeline', 'charts', 'health'],
+          notifications: { email: true, browser: true, sound: false },
+        },
+      },
+      passwordHash: bcrypt.hashSync('123456', 8),
+    }
+    saveUsers(users)
+  }
+}
+seedTestUser()
+
 // 获取当前用户
 export async function getMe(): Promise<User | null> {
   const token = localStorage.getItem('wfbot_auth_token')

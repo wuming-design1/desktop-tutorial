@@ -89,6 +89,12 @@ function switchMode() {
     router.push({ name: 'login', query: route.query })
   }
 }
+
+function fillTestAccount() {
+  form.value.email = 'admin@demo.com'
+  form.value.password = '123456'
+  error.value = ''
+}
 </script>
 
 <template>
@@ -109,6 +115,20 @@ function switchMode() {
 
         <NAlert v-if="error" type="error" :bordered="false" style="margin-bottom: 16px">
           {{ error }}
+        </NAlert>
+
+        <!-- 测试账号提示 -->
+        <NAlert v-if="isLogin" type="info" :bordered="false" style="margin-bottom: 16px;cursor:pointer" @click="fillTestAccount" :title="'测试账号：admin@demo.com / 123456（管理员）'">
+          <template #header>
+            <div class="test-account">
+              <span>测试账号：</span>
+              <code class="test-code">admin@demo.com</code>
+              <span> / </span>
+              <code class="test-code">123456</code>
+              <span>（管理员）</span>
+              <span class="test-hint">点击自动填充</span>
+            </div>
+          </template>
         </NAlert>
 
         <NForm ref="formRef" :model="form" :rules="rules" label-placement="top">
@@ -278,5 +298,32 @@ function switchMode() {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
+}
+
+.test-account {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+.test-code {
+  background: rgba(108, 92, 231, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 0.85rem;
+  color: var(--primary);
+}
+.test-hint {
+  font-size: 0.75rem;
+  color: var(--primary);
+  margin-left: 8px;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 </style>
