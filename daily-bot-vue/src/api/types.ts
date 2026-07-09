@@ -53,3 +53,25 @@ export interface BarItem {
   value: number
   avatar?: string
 }
+
+// 飞书任务管理
+export interface FeishuTask {
+  id: string
+  summary: string
+  description?: string
+  status: 'not_started' | 'in_progress' | 'completed'
+  completedAt: string | null
+  createdAt: string
+  updatedAt: string
+  creator: { id: string; name: string; avatar?: string }
+  assignees: { id: string; name: string; avatar?: string }[]
+  followers: { id: string; name: string; avatar?: string }[]
+  origin?: { platform: string; url: string; custom_complete?: boolean }
+  dueDate?: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+}
+
+export interface FeishuTaskList {
+  total: number
+  tasks: FeishuTask[]
+}
