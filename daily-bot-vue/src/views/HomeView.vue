@@ -42,6 +42,7 @@ const demoSummaryRows = [
 const demoTimelineItems = [
   { time: '10:30', text: '张三 提交了 dashboard 模块更新', type: 'commit' },
   { time: '09:45', text: '李四 合并了 PR #128 feature/user-auth', type: 'pr' },
+  { time: '09:15', text: '蛋挞 提交了 3 个 commit 到 feat/api-optimize', type: 'commit' },
   { time: '09:00', text: '飞书审批单 #20240709-001 已通过', type: 'approval' },
   { time: '08:30', text: '每日站会纪要已自动生成', type: 'meeting' },
 ]
