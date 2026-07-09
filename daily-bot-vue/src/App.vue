@@ -14,11 +14,13 @@ import LoginModal from '@/components/common/LoginModal.vue'
 import { useTheme } from '@/composables/useTheme'
 import { useKeyboard } from '@/composables/useKeyboard'
 import { useSummaryStore } from '@/stores/summary'
+import { useCredStore } from '@/stores/credStore'
 import NProgress from 'nprogress'
 
 const router = useRouter()
 const { isDark } = useTheme()
 const summaryStore = useSummaryStore()
+const credStore = useCredStore()
 
 const naiveTheme = computed(() => (isDark.value ? darkTheme : null))
 
@@ -59,6 +61,10 @@ useKeyboard([
 
 onMounted(() => {
   summaryStore.loadData()
+  // 首次打开或未配置凭证时，自动弹出凭证管理
+  if (!credStore.hasAnyCredential) {
+    setTimeout(() => openLogin(), 500)
+  }
 })
 </script>
 

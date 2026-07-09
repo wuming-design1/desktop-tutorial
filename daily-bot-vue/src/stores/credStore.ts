@@ -10,6 +10,7 @@ export const PLATFORM_KEYS: Record<string, { ids: string[]; envKeys: string[] }>
 export const useCredStore = defineStore('cred', () => {
   const creds = ref<Record<string,string>>(JSON.parse(localStorage.getItem('wfbot4_creds')||'{}'))
   const showLogin = ref(!Object.values(creds.value).some(v=>v))
+  const hasAnyCredential = computed(() => Object.values(creds.value).some(v => v && v.trim()))
   const saveCreds = (c:Record<string,string>) => { localStorage.setItem('wfbot4_creds',JSON.stringify(c)); creds.value = c }
   const getCred = (k:string) => creds.value[k]||''
   const isConnected = (p:string) => p==='weather'?true:PLATFORM_KEYS[p].envKeys.every(k=>creds.value[k]&&creds.value[k].trim())
@@ -23,5 +24,5 @@ export const useCredStore = defineStore('cred', () => {
     Object.entries(PLATFORM_KEYS).forEach(([,cfg]) => cfg.ids.forEach((id,i)=> { if(fd[id]&&fd[id].trim()) nc[cfg.envKeys[i]]=fd[id].trim() }))
     saveCreds(nc); showLogin.value = false
   }
-  return { creds, showLogin, platformStatus, saveCreds, getCred, isConnected, saveFromForm }
+  return { creds, showLogin, hasAnyCredential, platformStatus, saveCreds, getCred, isConnected, saveFromForm }
 })
