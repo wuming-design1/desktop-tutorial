@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, h } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { NDropdown, NAvatar, NButton, NTag } from 'naive-ui'
 import type { DropdownOption } from 'naive-ui'
