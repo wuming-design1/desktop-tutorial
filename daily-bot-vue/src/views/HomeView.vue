@@ -70,6 +70,7 @@ const demoChartBar = [
   { name: '王五', commits: 15, prs: 4 },
   { name: '赵六', commits: 12, prs: 3 },
   { name: '孙七', commits: 9, prs: 2 },
+  { name: '蛋挞', commits: 20, prs: 5 },
 ]
 
 const demoHealth = [
@@ -109,10 +110,11 @@ const realTimelineItems = computed(() => {
 const metrics = computed(() => isDemo.value ? demoMetrics : realMetrics.value)
 const summaryRows = computed(() => isDemo.value ? demoSummaryRows : realSummaryRows.value)
 const timelineItems = computed(() => isDemo.value ? demoTimelineItems : realTimelineItems.value)
-const chartTrendData = computed(() => isDemo.value ? demoChartTrend : demoChartTrend) // 真实图表待后续接入
-const chartPieData = computed(() => isDemo.value ? demoChartPie : demoChartPie)
-const chartBarData = computed(() => isDemo.value ? demoChartBar : demoChartBar)
-const healthStatus = computed(() => isDemo.value ? demoHealth : demoHealth)
+// 真实模式下图表数据为空（待后续接入真实 API 图表数据）
+const chartTrendData = computed(() => isDemo.value ? demoChartTrend : [])
+const chartPieData = computed(() => isDemo.value ? demoChartPie : [])
+const chartBarData = computed(() => isDemo.value ? demoChartBar : [])
+const healthStatus = computed(() => isDemo.value ? demoHealth : [])
 
 const healthExpanded = ref(false)
 
@@ -254,7 +256,7 @@ watch(dataMode, async (mode) => {
     <NGrid :cols="3" :x-gap="20" :y-gap="20" class="chart-grid">
       <NGi>
         <NCard title="📈 提交趋势 (本周)">
-          <div class="chart-trend">
+          <div class="chart-trend" v-if="chartTrendData.length > 0">
             <div class="trend-bars">
               <div
                 v-for="d in chartTrendData"
@@ -273,11 +275,12 @@ watch(dataMode, async (mode) => {
               <span class="legend-item"><span class="legend-dot" style="background:#A29BFE" /> PR</span>
             </div>
           </div>
+          <div v-else class="empty-hint">暂无趋势数据，请配置 GitHub 凭证</div>
         </NCard>
       </NGi>
       <NGi>
         <NCard title="🍩 任务分布">
-          <div class="chart-pie">
+          <div class="chart-pie" v-if="chartPieData.length > 0">
             <svg viewBox="0 0 160 160" class="pie-svg">
               <circle cx="80" cy="80" r="60" fill="none" stroke="#eee" stroke-width="20" />
               <circle
@@ -296,11 +299,12 @@ watch(dataMode, async (mode) => {
               </span>
             </div>
           </div>
+          <div v-else class="empty-hint">暂无任务分布数据</div>
         </NCard>
       </NGi>
       <NGi>
         <NCard title="👤 成员活跃度">
-          <div class="chart-bar">
+          <div class="chart-bar" v-if="chartBarData.length > 0">
             <div
               v-for="d in chartBarData"
               :key="d.name"
@@ -318,6 +322,7 @@ watch(dataMode, async (mode) => {
               <span class="bar-row-val">{{ d.commits }}次</span>
             </div>
           </div>
+          <div v-else class="empty-hint">暂无活跃度数据</div>
         </NCard>
       </NGi>
     </NGrid>
