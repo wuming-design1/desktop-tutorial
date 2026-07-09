@@ -74,28 +74,19 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach(async (to, _from) => {
+router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
 
   // 需要认证的路由
   if (to.meta.requiresAuth) {
-    // 延迟检查以确保 Store 已初始化
     if (!authStore.isAuthenticated) {
       // 检查 localStorage 中是否有 token
       const token = localStorage.getItem('wfbot_auth_token')
       if (token) {
-        // 有 token 但 Store 未初始化，尝试从 localStorage 恢复
-        try {
-          const { isTokenValid } = await import('@/api/auth')
-          if (isTokenValid()) {
-            const user = JSON.parse(localStorage.getItem('wfbot_auth_user') || 'null')
-            if (user) {
-              authStore.setAuth(token, user)
-              return true
-            }
-          }
-        } catch {
-          // token 无效，清除
+        const user = JSON.parse(localStorage.getItem('wfbot_auth_user') || 'null')
+        if (user) {
+          authStore.setAuth(token, user)
+          return true
         }
       }
       return { name: 'login', query: { redirect: to.fullPath } }

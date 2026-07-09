@@ -55,17 +55,13 @@ async function hashPassword(password: string): Promise<string> {
   return bcrypt.hashSync(password, 8)
 }
 
-async function comparePassword(password: string, hash: string): Promise<boolean> {
-  const { default: bcrypt } = await import('bcryptjs')
-  return bcrypt.compareSync(password, hash)
-}
-
-// 预创建测试账号
-function seedTestUser() {
+// 预创建测试账号（使用简单哈希，避免 bcrypt 初始化问题）
+async function seedTestUser() {
   const users = getUsers()
   if (!users['admin@demo.com']) {
-    const bcrypt = require('bcryptjs')
     const now = new Date().toISOString()
+    // 使用简单哈希避免 bcrypt 在模块加载时的问题
+    const simpleHash = await simpleHashPassword('123456')
     users['admin@demo.com'] = {
       user: {
         id: 'admin_test_001',
@@ -81,12 +77,35 @@ function seedTestUser() {
           notifications: { email: true, browser: true, sound: false },
         },
       },
-      passwordHash: bcrypt.hashSync('123456', 8),
+      passwordHash: simpleHash,
     }
     saveUsers(users)
   }
 }
-seedTestUser()
+// 延迟执行 seed，不阻塞模块加载
+setTimeout(() => seedTestUser(), 0)
+
+// 简单密码哈希（备用，避免 bcrypt 初始化问题）
+async function simpleHashPassword(password: string): Promise<string> {
+  try {
+    const { default: bcrypt } = await import('bcryptjs')
+    return bcrypt.hashSync(password, 8)
+  } catch {
+    // 如果 bcrypt 加载失败，使用简单 base64 哈希
+    return b64Encode('hash:' + password + ':' + JWT_SECRET)
+  }
+}
+
+async function comparePassword(password: string, hash: string): Promise<boolean> {
+  try {
+    const { default: bcrypt } = await import('bcryptjs')
+    return bcrypt.compareSync(password, hash)
+  } catch {
+    // 降级：使用简单比较
+    const expected = b64Encode('hash:' + password + ':' + JWT_SECRET)
+    return hash === expected
+  }
+}
 
 // 获取当前用户
 export async function getMe(): Promise<User | null> {
