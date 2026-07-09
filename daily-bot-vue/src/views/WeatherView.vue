@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { NCard, NTag, NButton, NSpin, useMessage } from 'naive-ui'
 import axios from 'axios'
 import { useCredStore } from '@/stores/credStore'
@@ -12,6 +12,13 @@ const city = computed(() => credStore.getCred('WEATHER_CITY') || 'Beijing')
 const loading = ref(false)
 const weatherData = ref<any>(null)
 const error = ref('')
+
+onMounted(() => {
+  // 如果配置了城市，自动加载天气
+  if (city.value) {
+    fetchWeather()
+  }
+})
 
 // WMO Weather Code Mapping
 const wmoMap: Record<number, { desc: string; icon: string }> = {
