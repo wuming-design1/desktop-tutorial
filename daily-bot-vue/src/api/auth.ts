@@ -228,3 +228,57 @@ export async function updateUserSettings(
   saveUsers(users)
   return entry.user
 }
+
+// ====== 管理员功能 ======
+
+// 获取所有用户列表
+export async function listUsers(): Promise<User[]> {
+  await new Promise(r => setTimeout(r, 300))
+  const users = getUsers()
+  return Object.values(users).map(e => ({
+    ...e.user,
+    // 不暴露密码哈希
+  }))
+}
+
+// 删除用户
+export async function deleteUser(email: string): Promise<boolean> {
+  await new Promise(r => setTimeout(r, 300))
+  const users = getUsers()
+  if (!users[email]) throw new Error('用户不存在')
+  if (users[email].user.role === 'admin') {
+    // 检查是否还有其他管理员
+    const adminCount = Object.values(users).filter(e => e.user.role === 'admin').length
+    if (adminCount <= 1) throw new Error('不能删除唯一的管理员账号')
+  }
+  delete users[email]
+  saveUsers(users)
+  return true
+}
+
+// 重置用户密码
+export async function resetUserPassword(email: string, newPassword: string): Promise<boolean> {
+  await new Promise(r => setTimeout(r, 300))
+  const users = getUsers()
+  if (!users[email]) throw new Error('用户不存在')
+  const passwordHash = await simpleHashPassword(newPassword)
+  users[email].passwordHash = passwordHash
+  saveUsers(users)
+  return true
+}
+
+// 修改用户角色
+export async function updateUserRole(email: string, role: User['role']): Promise<User | null> {
+  await new Promise(r => setTimeout(r, 300))
+  const users = getUsers()
+  if (!users[email]) throw new Error('用户不存在')
+  if (role !== 'admin') {
+    const adminCount = Object.values(users).filter(e => e.user.role === 'admin').length
+    if (users[email].user.role === 'admin' && adminCount <= 1) {
+      throw new Error('不能移除唯一的管理员权限')
+    }
+  }
+  users[email].user.role = role
+  saveUsers(users)
+  return users[email].user
+}

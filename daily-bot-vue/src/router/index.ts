@@ -63,6 +63,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/SettingsView.vue'),
     meta: { title: '系统设置', requiresAuth: true },
   },
+  {
+    path: '/admin/users',
+    name: 'admin_users',
+    component: () => import('@/views/UsersAdminView.vue'),
+    meta: { title: '用户管理', requiresAuth: true, requiresAdmin: true },
+  },
 ]
 
 const router = createRouter({
@@ -80,7 +86,6 @@ router.beforeEach((to, _from) => {
   // 需要认证的路由
   if (to.meta.requiresAuth) {
     if (!authStore.isAuthenticated) {
-      // 检查 localStorage 中是否有 token
       const token = localStorage.getItem('wfbot_auth_token')
       if (token) {
         const user = JSON.parse(localStorage.getItem('wfbot_auth_user') || 'null')
@@ -90,6 +95,11 @@ router.beforeEach((to, _from) => {
         }
       }
       return { name: 'login', query: { redirect: to.fullPath } }
+    }
+
+    // 需要管理员权限
+    if (to.meta.requiresAdmin && !authStore.isAdmin) {
+      return { name: 'dashboard' }
     }
   }
 

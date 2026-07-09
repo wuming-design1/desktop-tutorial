@@ -21,25 +21,31 @@ const moreMenuOptions: DropdownOption[] = [
   { label: '系统设置', key: '/settings' },
 ]
 
-const userMenuOptions: DropdownOption[] = [
-  {
-    label: () => h('div', { style: 'padding:4px 0' }, [
-      h('div', { style: 'font-weight:600;font-size:0.9rem' }, authStore.displayName),
-      h('div', { style: 'font-size:0.78rem;color:var(--text-muted)' }, [
-        authStore.user?.email || '',
-        ' · ',
-        authStore.user?.role === 'admin' ? '管理员' : authStore.user?.role === 'viewer' ? '观察者' : '成员',
+const userMenuOptions = computed<DropdownOption[]>(() => {
+  const opts: DropdownOption[] = [
+    {
+      label: () => h('div', { style: 'padding:4px 0' }, [
+        h('div', { style: 'font-weight:600;font-size:0.9rem' }, authStore.displayName),
+        h('div', { style: 'font-size:0.78rem;color:var(--text-muted)' }, [
+          authStore.user?.email || '',
+          ' · ',
+          authStore.user?.role === 'admin' ? '管理员' : authStore.user?.role === 'viewer' ? '观察者' : '成员',
+        ]),
       ]),
-    ]),
-    key: 'user-info',
-    disabled: true,
-  },
-  { type: 'divider', key: 'd0' },
-  { label: '管理凭证', key: 'credentials' },
-  { label: '系统设置', key: 'settings' },
-  { type: 'divider', key: 'd2' },
-  { label: '退出登录', key: 'logout' },
-]
+      key: 'user-info',
+      disabled: true,
+    },
+    { type: 'divider', key: 'd0' },
+    { label: '管理凭证', key: 'credentials' },
+    { label: '系统设置', key: 'settings' },
+  ]
+  if (authStore.isAdmin) {
+    opts.push({ label: '用户管理', key: 'admin_users' })
+  }
+  opts.push({ type: 'divider', key: 'd2' })
+  opts.push({ label: '退出登录', key: 'logout' })
+  return opts
+})
 
 const handleMoreSelect = (key: string) => {
   router.push(key)
@@ -50,6 +56,8 @@ const handleUserSelect = (key: string) => {
     openLogin()
   } else if (key === 'settings') {
     router.push('/settings')
+  } else if (key === 'admin_users') {
+    router.push('/admin/users')
   } else if (key === 'logout') {
     authStore.clearAuth()
     router.push({ name: 'login' })

@@ -63,10 +63,23 @@ useKeyboard([
   },
 ])
 
+// 用户登录后重新加载各 Store 的隔离数据
+watch(() => authStore.isAuthenticated, (val) => {
+  if (val) {
+    credStore.reload()
+    summaryStore.reload()
+    summaryStore.loadData()
+    if (!credStore.hasAnyCredential) {
+      setTimeout(() => openLogin(), 800)
+    }
+  }
+})
+
 onMounted(() => {
   if (authStore.isAuthenticated) {
+    credStore.reload()
+    summaryStore.reload()
     summaryStore.loadData()
-    // 首次登录或未配置凭证时，自动弹出凭证管理
     if (!credStore.hasAnyCredential) {
       setTimeout(() => openLogin(), 800)
     }
