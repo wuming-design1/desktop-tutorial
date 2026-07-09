@@ -15,6 +15,15 @@ export interface DashboardStats {
   activeMembers: number
   totalMembers: number
   coverage: number
+  // 真实 API 模式扩展字段
+  taskRate?: number
+  members?: number
+  changes?: number
+  activeRepos?: number
+  newIssues?: number
+  closedIssues?: number
+  reviews?: number
+  releases?: number
 }
 
 export interface TimelineItem {

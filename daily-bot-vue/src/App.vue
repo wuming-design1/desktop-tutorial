@@ -64,11 +64,11 @@ useKeyboard([
 ])
 
 // 用户登录后重新加载各 Store 的隔离数据
+// 不在此处加载数据（demo/real），由各页面根据当前模式自行加载
 watch(() => authStore.isAuthenticated, (val) => {
   if (val) {
     credStore.reload()
     summaryStore.reload()
-    summaryStore.loadData()
     if (!credStore.hasAnyCredential) {
       setTimeout(() => openLogin(), 800)
     }
@@ -79,7 +79,6 @@ onMounted(() => {
   if (authStore.isAuthenticated) {
     credStore.reload()
     summaryStore.reload()
-    summaryStore.loadData()
     if (!credStore.hasAnyCredential) {
       setTimeout(() => openLogin(), 800)
     }

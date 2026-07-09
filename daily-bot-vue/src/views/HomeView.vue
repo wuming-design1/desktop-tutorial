@@ -123,8 +123,21 @@ const systemStatus = computed(() => {
 })
 
 onMounted(async () => {
-  await summaryStore.loadData()
+  if (isDemo.value) {
+    await summaryStore.loadDemoData()
+  } else {
+    await summaryStore.loadRealData()
+  }
   appStore.updateTime()
+})
+
+// 切换模式时重新加载数据
+watch(dataMode, async (mode) => {
+  if (mode === 'demo') {
+    await summaryStore.loadDemoData()
+  } else {
+    await summaryStore.loadRealData()
+  }
 })
 </script>
 
