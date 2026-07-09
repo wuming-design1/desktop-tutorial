@@ -1,0 +1,55 @@
+export interface SummaryData {
+  date: string
+  summary: string
+  highlights: string[]
+  blockers: string[]
+  stats: DashboardStats
+  updates: TimelineItem[]
+}
+
+export interface DashboardStats {
+  commits: number
+  commitsChange: number
+  tasks: number
+  urgentTasks: number
+  activeMembers: number
+  totalMembers: number
+  coverage: number
+}
+
+export interface TimelineItem {
+  id: string
+  time: string
+  source: 'github' | 'feishu' | 'ai' | 'system'
+  author: string
+  avatar?: string
+  content: string
+  detail?: string
+  status?: 'pending' | 'done' | 'review' | 'closed'
+  url?: string
+}
+
+export interface HealthStatus {
+  service: string
+  status: 'healthy' | 'degraded' | 'down'
+  latency: number
+  uptime: number
+  lastChecked: string
+}
+
+export interface TrendPoint {
+  date: string
+  value: number
+}
+
+export interface PieSlice {
+  name: string
+  value: number
+  color?: string
+}
+
+export interface BarItem {
+  name: string
+  value: number
+  avatar?: string
+}

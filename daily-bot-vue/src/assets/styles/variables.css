@@ -1,0 +1,50 @@
+:root {
+  --primary: #6C5CE7;
+  --primary-light: #A29BFE;
+  --primary-dark: #4A3DBF;
+  --primary-gradient: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --danger: #FF7675;
+  --info: #74B9FF;
+  --bg-body: #F8F9FC;
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card-solid: #FFFFFF;
+  --bg-input: #F1F2F6;
+  --bg-hover: rgba(108, 92, 231, 0.04);
+  --text-primary: #1A1A2E;
+  --text-secondary: #5A5A7A;
+  --text-muted: #8A8AA8;
+  --text-inverse: #EEEEF0;
+  --border: rgba(108, 92, 231, 0.08);
+  --border-light: rgba(108, 92, 231, 0.04);
+  --shadow-sm: 0 2px 12px rgba(108, 92, 231, 0.06);
+  --shadow-md: 0 8px 32px rgba(108, 92, 231, 0.08);
+  --shadow-lg: 0 16px 48px rgba(108, 92, 231, 0.12);
+  --shadow-glow: 0 0 60px rgba(108, 92, 231, 0.08);
+  --glass-blur: 20px;
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html.dark {
+  --bg-body: #0F1117;
+  --bg-card: rgba(26, 30, 40, 0.85);
+  --bg-card-solid: #1A1E28;
+  --bg-input: #1E2230;
+  --bg-hover: rgba(108, 92, 231, 0.08);
+  --text-primary: #E0E0E8;
+  --text-secondary: #9090A8;
+  --text-muted: #606078;
+  --text-inverse: #0F1117;
+  --border: rgba(108, 92, 231, 0.12);
+  --border-light: rgba(108, 92, 231, 0.06);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 80px rgba(108, 92, 231, 0.12);
+  --glass-border: rgba(255,255,255,0.06);
+}

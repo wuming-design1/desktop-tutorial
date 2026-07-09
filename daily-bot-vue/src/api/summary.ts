@@ -1,0 +1,143 @@
+import type { SummaryData, HealthStatus } from './types'
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export async function fetchSummary(): Promise<SummaryData> {
+  await new Promise((resolve) => setTimeout(resolve, 600))
+
+  return {
+    date: today(),
+    summary: '今日团队整体进展顺利，代码提交活跃，多项任务已进入收尾阶段。',
+    highlights: [
+      '前端核心模块重构完成，性能提升40%',
+      '后端 API 接口全部通过压力测试',
+      'AI 代码助手正式上线，开发者反馈积极'
+    ],
+    blockers: [
+      'CI/CD 流水线偶发超时，需排查 Runner 配置',
+      '跨部门协作需求文档评审延期至下周'
+    ],
+    stats: {
+      commits: 12,
+      commitsChange: 20,
+      tasks: 23,
+      urgentTasks: 3,
+      activeMembers: 8,
+      totalMembers: 12,
+      coverage: 85
+    },
+    updates: [
+      {
+        id: '1',
+        time: `${today()}T09:15:00Z`,
+        source: 'github',
+        author: '张三',
+        content: '推送了 feat/refactor-core 分支',
+        detail: '重构核心模块，新增 3 个组件，移除 2 个废弃 API',
+        status: 'review',
+        url: 'https://github.com/example/pr/1'
+      },
+      {
+        id: '2',
+        time: `${today()}T09:45:00Z`,
+        source: 'feishu',
+        author: '李四',
+        content: '晨会纪要：确定今日工作重点',
+        detail: '前端：完成 Dashboard 页面；后端：修复登录 BUG'
+      },
+      {
+        id: '3',
+        time: `${today()}T10:30:00Z`,
+        source: 'github',
+        author: '王五',
+        content: '合并 PR #42 到 main 分支',
+        detail: '修复了登录页面的 token 刷新问题',
+        status: 'done',
+        url: 'https://github.com/example/pr/42'
+      },
+      {
+        id: '4',
+        time: `${today()}T11:00:00Z`,
+        source: 'ai',
+        author: 'AI 助手',
+        content: '代码审查：发现 3 处潜在性能问题',
+        detail: 'Suggestions: 1) 使用虚拟滚动优化长列表 2) 图片懒加载 3) 防抖输入搜索'
+      },
+      {
+        id: '5',
+        time: `${today()}T14:00:00Z`,
+        source: 'github',
+        author: '赵六',
+        content: '提交了 2 个 commit 到 feat/ci-optimize',
+        detail: '优化 CI 构建流程，构建时间缩短 30%',
+        status: 'pending',
+        url: 'https://github.com/example/commits/feat/ci-optimize'
+      },
+      {
+        id: '6',
+        time: `${today()}T15:20:00Z`,
+        source: 'feishu',
+        author: '钱七',
+        content: 'QA 测试报告：回归测试通过率 96%',
+        detail: '新增 12 个测试用例，发现 2 个低优先级 ISSUE'
+      },
+      {
+        id: '7',
+        time: `${today()}T16:00:00Z`,
+        source: 'system',
+        author: '系统',
+        content: '自动化部署完成',
+        detail: 'staging 环境已部署最新版本 v2.3.1',
+        status: 'done'
+      },
+      {
+        id: '8',
+        time: `${today()}T17:30:00Z`,
+        source: 'ai',
+        author: 'AI 助手',
+        content: '今日工作总结生成完毕',
+        detail: '已根据今日代码提交、飞书消息和任务状态生成日报草稿',
+        status: 'done'
+      }
+    ]
+  }
+}
+
+export async function fetchHealthStatus(): Promise<HealthStatus[]> {
+  await new Promise((resolve) => setTimeout(resolve, 400))
+
+  const now = new Date().toISOString()
+
+  return [
+    {
+      service: 'GitHub',
+      status: 'healthy',
+      latency: 120,
+      uptime: 99.97,
+      lastChecked: now
+    },
+    {
+      service: '飞书',
+      status: 'healthy',
+      latency: 85,
+      uptime: 99.99,
+      lastChecked: now
+    },
+    {
+      service: '数据库',
+      status: 'healthy',
+      latency: 45,
+      uptime: 99.95,
+      lastChecked: now
+    },
+    {
+      service: 'AI 服务',
+      status: 'degraded',
+      latency: 320,
+      uptime: 98.5,
+      lastChecked: now
+    }
+  ]
+}
