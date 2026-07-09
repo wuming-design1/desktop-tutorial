@@ -15,12 +15,15 @@ import { useTheme } from '@/composables/useTheme'
 import { useKeyboard } from '@/composables/useKeyboard'
 import { useSummaryStore } from '@/stores/summary'
 import { useCredStore } from '@/stores/credStore'
+import { useAuthStore } from '@/stores/auth'
 import NProgress from 'nprogress'
 
 const router = useRouter()
+const route = useRoute()
 const { isDark } = useTheme()
 const summaryStore = useSummaryStore()
 const credStore = useCredStore()
+const authStore = useAuthStore()
 
 const naiveTheme = computed(() => (isDark.value ? darkTheme : null))
 
@@ -34,6 +37,7 @@ const themeOverrides = {
 }
 
 const loginModalRef = ref()
+const isAuthPage = computed(() => route.meta.guest === true)
 
 function openLogin() {
   loginModalRef.value?.open()
@@ -60,10 +64,12 @@ useKeyboard([
 ])
 
 onMounted(() => {
-  summaryStore.loadData()
-  // 首次打开或未配置凭证时，自动弹出凭证管理
-  if (!credStore.hasAnyCredential) {
-    setTimeout(() => openLogin(), 500)
+  if (authStore.isAuthenticated) {
+    summaryStore.loadData()
+    // 首次登录或未配置凭证时，自动弹出凭证管理
+    if (!credStore.hasAnyCredential) {
+      setTimeout(() => openLogin(), 800)
+    }
   }
 })
 </script>
@@ -74,12 +80,22 @@ onMounted(() => {
       <NNotificationProvider>
         <NLoadingBarProvider>
           <NDialogProvider>
-            <div class="app-layout" :class="{ dark: isDark }">
+            <!-- 认证页面：无导航栏，纯净登录/注册 -->
+            <div v-if="isAuthPage" class="app-auth-layout">
+              <router-view v-slot="{ Component, route: r }">
+                <transition name="page" mode="out-in">
+                  <component :is="Component" :key="r.path" />
+                </transition>
+              </router-view>
+            </div>
+
+            <!-- 主应用布局 -->
+            <div v-else class="app-layout" :class="{ dark: isDark }">
               <AppHeader />
               <main class="app-main">
-                <router-view v-slot="{ Component, route }">
+                <router-view v-slot="{ Component, route: r }">
                   <transition name="page" mode="out-in">
-                    <component :is="Component" :key="route.path" />
+                    <component :is="Component" :key="r.path" />
                   </transition>
                 </router-view>
               </main>
@@ -95,6 +111,10 @@ onMounted(() => {
 </template>
 
 <style>
+.app-auth-layout {
+  min-height: 100vh;
+}
+
 .app-layout {
   min-height: 100vh;
   display: flex;

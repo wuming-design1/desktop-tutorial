@@ -13,7 +13,7 @@ const http: AxiosInstance = axios.create({
 
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('wfbot_token')
+    const token = localStorage.getItem('wfbot_auth_token')
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -48,8 +48,9 @@ http.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      localStorage.removeItem('wfbot_token')
-      window.location.href = '/login'
+      localStorage.removeItem('wfbot_auth_token')
+      localStorage.removeItem('wfbot_auth_user')
+      window.location.hash = '#/login'
     }
 
     return Promise.reject(error)

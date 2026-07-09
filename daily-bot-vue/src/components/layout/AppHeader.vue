@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { NDropdown, NAvatar, NButton } from 'naive-ui'
+import { NDropdown, NAvatar, NButton, NTag } from 'naive-ui'
 import type { DropdownOption } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
 import NotificationBell from '@/components/common/NotificationBell.vue'
 
 const router = useRouter()
 const app = useAppStore()
+const authStore = useAuthStore()
 const openLogin = inject<() => void>('openLogin', () => {})
 
 const moreMenuOptions: DropdownOption[] = [
@@ -20,9 +22,21 @@ const moreMenuOptions: DropdownOption[] = [
 ]
 
 const userMenuOptions: DropdownOption[] = [
+  {
+    label: () => h('div', { style: 'padding:4px 0' }, [
+      h('div', { style: 'font-weight:600;font-size:0.9rem' }, authStore.displayName),
+      h('div', { style: 'font-size:0.78rem;color:var(--text-muted)' }, [
+        authStore.user?.email || '',
+        ' · ',
+        authStore.user?.role === 'admin' ? '管理员' : authStore.user?.role === 'viewer' ? '观察者' : '成员',
+      ]),
+    ]),
+    key: 'user-info',
+    disabled: true,
+  },
+  { type: 'divider', key: 'd0' },
   { label: '管理凭证', key: 'credentials' },
   { label: '系统设置', key: 'settings' },
-  { label: '切换主题', key: 'theme' },
   { type: 'divider', key: 'd2' },
   { label: '退出登录', key: 'logout' },
 ]
@@ -36,16 +50,23 @@ const handleUserSelect = (key: string) => {
     openLogin()
   } else if (key === 'settings') {
     router.push('/settings')
-  } else if (key === 'theme') {
-    app.toggleTheme()
   } else if (key === 'logout') {
-    // logout logic placeholder
+    authStore.clearAuth()
+    router.push({ name: 'login' })
   }
 }
 
 const doRefresh = () => {
   app.updateTime()
 }
+
+const roleLabel = computed(() => {
+  switch (authStore.user?.role) {
+    case 'admin': return '管理员'
+    case 'viewer': return '观察者'
+    default: return '成员'
+  }
+})
 </script>
 
 <template>
@@ -79,9 +100,12 @@ const doRefresh = () => {
         <ThemeToggle />
         <NotificationBell />
         <NDropdown trigger="click" :options="userMenuOptions" :on-select="handleUserSelect" placement="bottom-end">
-          <NAvatar size="small" class="user-avatar" :style="{ background: 'var(--primary-gradient)', cursor: 'pointer' }">
-            <span style="font-size: 14px;">👤</span>
-          </NAvatar>
+          <div class="user-trigger">
+            <NAvatar size="small" class="user-avatar" :style="{ background: 'var(--primary-gradient)', cursor: 'pointer' }">
+              <span style="font-size: 14px;font-weight:600">{{ authStore.avatarLetter }}</span>
+            </NAvatar>
+            <span class="user-name">{{ authStore.displayName }}</span>
+          </div>
         </NDropdown>
       </div>
     </div>
@@ -203,10 +227,30 @@ const doRefresh = () => {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* User */
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 10px;
+  transition: all var(--transition);
+}
+.user-trigger:hover {
+  background: var(--bg-hover);
+}
 .user-avatar {
   transition: transform var(--transition);
 }
-.user-avatar:hover {
-  transform: scale(1.05);
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

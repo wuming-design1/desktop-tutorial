@@ -75,3 +75,49 @@ export interface FeishuTaskList {
   total: number
   tasks: FeishuTask[]
 }
+
+// 用户认证
+export interface User {
+  id: string
+  username: string
+  email: string
+  avatar?: string
+  role: 'admin' | 'member' | 'viewer'
+  createdAt: string
+  lastLoginAt: string
+  settings: UserSettings
+}
+
+export interface UserSettings {
+  theme: 'light' | 'dark' | 'system'
+  refreshInterval: 30 | 60 | 120 | 0
+  cardLayout: string[]
+  notifications: {
+    email: boolean
+    browser: boolean
+    sound: boolean
+  }
+}
+
+export interface AuthState {
+  user: User | null
+  token: string | null
+  isAuthenticated: boolean
+  isLoading: boolean
+}
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest {
+  username: string
+  email: string
+  password: string
+}
+
+export interface AuthResponse {
+  user: User
+  token: string
+}
