@@ -108,9 +108,7 @@ async function comparePassword(password: string, hash: string): Promise<boolean>
 }
 
 // 获取当前用户
-export async function getMe(): Promise<User | null> {
-  const token = localStorage.getItem('wfbot_auth_token')
-  if (!token) return null
+export async function getMe(token: string): Promise<User | null> {
   const decoded = verifyToken(token)
   if (!decoded) return null
   const users = getUsers()
@@ -191,9 +189,7 @@ export async function logout(): Promise<void> {
 }
 
 // 刷新 Token
-export async function refreshToken(): Promise<{ token: string } | null> {
-  const currentToken = localStorage.getItem('wfbot_auth_token')
-  if (!currentToken) return null
+export async function refreshToken(currentToken: string): Promise<{ token: string } | null> {
   const decoded = verifyToken(currentToken)
   if (!decoded) return null
 
@@ -207,9 +203,7 @@ export async function refreshToken(): Promise<{ token: string } | null> {
 }
 
 // 验证 Token 是否有效
-export function isTokenValid(): boolean {
-  const token = localStorage.getItem('wfbot_auth_token')
-  if (!token) return false
+export function isTokenValid(token: string): boolean {
   const decoded = verifyToken(token)
   return decoded !== null
 }

@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import { useAuthStore } from '@/stores/auth'
 
 const MAX_RETRIES = 3
 const RETRY_DELAY = 1000
@@ -13,9 +14,9 @@ const http: AxiosInstance = axios.create({
 
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('wfbot_auth_token')
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    const authStore = useAuthStore()
+    if (authStore.token && config.headers) {
+      config.headers.Authorization = `Bearer ${authStore.token}`
     }
     return config
   },
@@ -48,8 +49,8 @@ http.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      localStorage.removeItem('wfbot_auth_token')
-      localStorage.removeItem('wfbot_auth_user')
+      const authStore = useAuthStore()
+      authStore.clearAuth()
       window.location.hash = '#/login'
     }
 

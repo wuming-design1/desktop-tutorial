@@ -2,12 +2,9 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, UserSettings } from '@/api/types'
 
-const TOKEN_KEY = 'wfbot_auth_token'
-const USER_KEY = 'wfbot_auth_user'
-
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem(TOKEN_KEY))
-  const user = ref<User | null>(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
+  const token = ref<string | null>(null)
+  const user = ref<User | null>(null)
   const isLoading = ref(false)
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
@@ -18,38 +15,41 @@ export const useAuthStore = defineStore('auth', () => {
   function setAuth(authToken: string, authUser: User) {
     token.value = authToken
     user.value = authUser
-    localStorage.setItem(TOKEN_KEY, authToken)
-    localStorage.setItem(USER_KEY, JSON.stringify(authUser))
   }
 
   function clearAuth() {
     token.value = null
     user.value = null
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
+    // 清除所有用户相关数据（凭证和汇总）
+    const keysToRemove = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.startsWith('wfbot_creds_') || key.startsWith('wfbot_summary_') || key === 'wfbot_data_mode')) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key))
   }
 
   function updateUser(updated: Partial<User>) {
     if (user.value) {
       user.value = { ...user.value, ...updated }
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
     }
   }
 
   function updateSettings(settings: Partial<UserSettings>) {
     if (user.value) {
       user.value.settings = { ...user.value.settings, ...settings }
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
     }
   }
 
   async function refreshToken(): Promise<boolean> {
     try {
+      if (!token.value) return false
       const { refreshToken: doRefresh } = await import('@/api/auth')
-      const result = await doRefresh()
+      const result = await doRefresh(token.value)
       if (result) {
         token.value = result.token
-        localStorage.setItem(TOKEN_KEY, result.token)
         return true
       }
     } catch {

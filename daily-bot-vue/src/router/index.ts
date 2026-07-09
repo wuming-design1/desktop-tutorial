@@ -79,32 +79,17 @@ const router = createRouter({
   },
 })
 
-// 路由守卫
+// 路由守卫：每次进入网站必须登录，不依赖 localStorage 持久化
 router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
 
-  // 需要认证的路由
-  if (to.meta.requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      const token = localStorage.getItem('wfbot_auth_token')
-      if (token) {
-        const user = JSON.parse(localStorage.getItem('wfbot_auth_user') || 'null')
-        if (user) {
-          authStore.setAuth(token, user)
-          return true
-        }
-      }
-      return { name: 'login', query: { redirect: to.fullPath } }
-    }
-
-    // 需要管理员权限
-    if (to.meta.requiresAdmin && !authStore.isAdmin) {
-      return { name: 'dashboard' }
-    }
+  // 需要认证的路由 → 未登录则跳转登录页
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // 已登录用户访问登录/注册页，重定向到首页
-  if (to.meta.guest && authStore.isAuthenticated) {
+  // 需要管理员权限
+  if (to.meta.requiresAuth && to.meta.requiresAdmin && !authStore.isAdmin) {
     return { name: 'dashboard' }
   }
 
