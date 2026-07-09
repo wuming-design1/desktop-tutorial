@@ -21,6 +21,8 @@ declare module 'vue' {
     LoginModal: typeof import('./components/common/LoginModal.vue')['default']
     MetricCards: typeof import('./components/dashboard/MetricCards.vue')['default']
     NotificationBell: typeof import('./components/common/NotificationBell.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     SearchModal: typeof import('./components/common/SearchModal.vue')['default']
     StatusIndicator: typeof import('./components/widgets/StatusIndicator.vue')['default']
     SummaryCard: typeof import('./components/dashboard/SummaryCard.vue')['default']
