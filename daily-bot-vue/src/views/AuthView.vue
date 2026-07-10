@@ -205,6 +205,10 @@ function switchMode() {
               {{ isLogin ? '立即注册' : '去登录' }}
             </NButton>
           </div>
+
+          <div class="admin-entry">
+            <router-link to="/admin/login" class="admin-link">管理员审计入口</router-link>
+          </div>
         </NForm>
       </NCard>
     </div>
@@ -390,6 +394,22 @@ function switchMode() {
   margin-top: 20px;
   font-size: 0.82rem;
   color: var(--text-muted);
+}
+
+.admin-entry {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.admin-link {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.admin-link:hover {
+  color: #D63031;
 }
 
 .glass-card {

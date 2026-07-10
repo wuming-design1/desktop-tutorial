@@ -25,6 +25,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     return
   }
 
+  // 超级管理员 token 不能访问用户 API
+  if (payload.role === 'super_admin') {
+    res.status(403).json({ error: '审计账户无权访问用户数据' })
+    return
+  }
+
   req.user = payload
   next()
 }

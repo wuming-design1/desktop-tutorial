@@ -12,6 +12,7 @@ import credentialRoutes from './routes/credentials'
 import dashboardRoutes from './routes/dashboard'
 import pushRoutes from './routes/push'
 import githubRoutes from './routes/github'
+import adminRoutes from './routes/admin'
 import healthRoutes from './routes/health'
 
 const app = express()
@@ -31,6 +32,7 @@ app.use('/api/credentials', credentialRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/push', pushRoutes)
 app.use('/api/github', githubRoutes)
+app.use('/api/admin', adminRoutes)
 app.use('/api/health', healthRoutes)
 
 // ====== 错误处理 ======

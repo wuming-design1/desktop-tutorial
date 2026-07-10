@@ -167,3 +167,33 @@ export async function apiSetDefaultAvatar(avatar: string): Promise<{ avatar: str
   const res = await http.post('/auth/avatar/default', { avatar })
   return res.data
 }
+
+// ========== 超级管理员（审计入口） ==========
+
+export interface AdminLoginRequest {
+  email: string
+  password: string
+}
+
+export interface AdminUser {
+  id: string
+  username: string
+  email: string
+  avatar?: string
+  role: string
+  createdAt: string
+  lastLoginAt: string
+}
+
+export async function apiAdminLogin(data: AdminLoginRequest): Promise<{
+  token: string
+  admin: { email: string; role: string }
+}> {
+  const res = await http.post('/admin/login', data)
+  return res.data
+}
+
+export async function apiAdminGetUsers(): Promise<{ total: number; users: AdminUser[] }> {
+  const res = await http.get('/admin/users')
+  return res.data
+}

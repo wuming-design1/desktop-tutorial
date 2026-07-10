@@ -7,9 +7,11 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default('7d'),
   DB_PATH: z.string().default('./data/app.db'),
-  ENCRYPTION_KEY: z.string().length(64), // 32 bytes in hex is 64 chars
+  ENCRYPTION_KEY: z.string().length(64),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  ADMIN_EMAIL: z.string().default('admin@audit.local'),
+  ADMIN_PASSWORD: z.string().default('admin123456'),
 })
 
 dotenv.config()

@@ -2,6 +2,17 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+// 扩展路由 meta 类型
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    requiresAdmin?: boolean
+    requiresAdminAuth?: boolean
+    guest?: boolean
+    title?: string
+  }
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -69,6 +80,19 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/UsersAdminView.vue'),
     meta: { title: '用户管理', requiresAuth: true, requiresAdmin: true },
   },
+  // 管理员审计入口（独立登录，不依赖用户 auth）
+  {
+    path: '/admin/login',
+    name: 'admin_login',
+    component: () => import('@/views/AdminLoginView.vue'),
+    meta: { title: '管理员登录', guest: true },
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'admin_dashboard',
+    component: () => import('@/views/AdminDashboardView.vue'),
+    meta: { title: '审计面板', requiresAdminAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -82,6 +106,15 @@ const router = createRouter({
 // 路由守卫：每次进入网站必须登录，不依赖 localStorage 持久化
 router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
+
+  // 管理员审计面板路由 → 检查 admin token
+  if (to.meta.requiresAdminAuth) {
+    const adminToken = localStorage.getItem('wfbot_admin_token')
+    if (!adminToken) {
+      return { name: 'admin_login' }
+    }
+    return true
+  }
 
   // 需要认证的路由 → 未登录则跳转登录页
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
