@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/layout/AppFooter.vue')['default']
     AppHeader: typeof import('./components/layout/AppHeader.vue')['default']
+    AvatarPicker: typeof import('./components/common/AvatarPicker.vue')['default']
     ChartBar: typeof import('./components/dashboard/ChartBar.vue')['default']
     ChartPie: typeof import('./components/dashboard/ChartPie.vue')['default']
     ChartTrend: typeof import('./components/dashboard/ChartTrend.vue')['default']

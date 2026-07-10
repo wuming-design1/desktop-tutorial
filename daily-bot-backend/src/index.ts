@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
+import { join } from 'path'
 import { env } from './config/env'
 import { initDatabase } from './models/schema'
 import { seedAdmin } from './services/authService'
@@ -19,6 +20,9 @@ const app = express()
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
 app.use(express.json({ limit: '1mb' }))
 app.use(morgan(env.LOG_LEVEL === 'debug' ? 'dev' : 'combined'))
+
+// ====== 静态文件（头像） ======
+app.use('/avatars', express.static(join(process.cwd(), 'public', 'avatars')))
 
 // ====== 路由 ======
 app.use('/api/auth', authRoutes)

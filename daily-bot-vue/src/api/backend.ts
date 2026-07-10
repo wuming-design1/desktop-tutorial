@@ -153,3 +153,17 @@ export async function apiCreatePRStaging(data: {
   const res = await http.post('/github/pr/staging', data)
   return res.data
 }
+
+// ========== 头像 ==========
+
+export async function apiUploadAvatar(formData: FormData): Promise<{ avatar: string }> {
+  const res = await http.post('/auth/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+export async function apiSetDefaultAvatar(avatar: string): Promise<{ avatar: string }> {
+  const res = await http.post('/auth/avatar/default', { avatar })
+  return res.data
+}

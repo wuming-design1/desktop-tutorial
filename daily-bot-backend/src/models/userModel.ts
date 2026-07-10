@@ -57,6 +57,10 @@ export function updateUserPassword(email: string, passwordHash: string): void {
   db.prepare('UPDATE users SET password = ? WHERE email = ?').run(passwordHash, email)
 }
 
+export function updateUserAvatar(email: string, avatar: string): void {
+  db.prepare('UPDATE users SET avatar = ? WHERE email = ?').run(avatar, email)
+}
+
 export function deleteUserByEmail(email: string): void {
   db.prepare('DELETE FROM users WHERE email = ?').run(email)
 }

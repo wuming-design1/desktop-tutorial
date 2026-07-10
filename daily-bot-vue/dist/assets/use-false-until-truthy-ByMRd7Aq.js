@@ -1,0 +1,1 @@
+import{Gn as e,er as t,tr as n}from"./_plugin-vue_export-helper-D7edCcqi.js";function r(r){let i=n(!!r.value);if(i.value)return t(i);let a=e(r,e=>{e&&(i.value=!0,a())});return t(i)}export{r as t};

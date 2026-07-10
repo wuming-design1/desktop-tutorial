@@ -1,1 +1,0 @@
-import{Nn as e,jn as t,tn as n}from"./_plugin-vue_export-helper-MsG4zd-3.js";import{n as r}from"./utils-Ckqnsuix.js";var i=r?document?.fonts?.ready:void 0,a=!1;i===void 0?a=!0:i.then(()=>{a=!0});function o(n){if(a)return;let r=!1;e(()=>{a||i?.then(()=>{r||n()})}),t(()=>{r=!0})}var{c:s}=n(),c=`vueuc-style`;export{c as n,o as r,s as t};

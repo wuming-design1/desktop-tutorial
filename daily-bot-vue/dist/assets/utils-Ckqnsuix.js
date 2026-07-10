@@ -1,1 +1,0 @@
-import{Cn as e}from"./_plugin-vue_export-helper-MsG4zd-3.js";function t(){return e()!==null}var n=typeof window<`u`;export{n,t};

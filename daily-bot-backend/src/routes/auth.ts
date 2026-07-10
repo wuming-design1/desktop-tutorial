@@ -1,9 +1,44 @@
 import { Router } from 'express'
+import multer from 'multer'
+import { extname, join } from 'path'
+import { mkdirSync, existsSync } from 'fs'
 import { authMiddleware } from '../middleware/auth'
 import * as authService from '../services/authService'
+import { updateUserAvatar } from '../models/userModel'
 import type { LoginRequest, RegisterRequest } from '../utils/types'
 
 const router = Router()
+
+// 文件上传配置：头像存储在 public/avatars 目录
+const storageDir = join(process.cwd(), 'public', 'avatars')
+if (!existsSync(storageDir)) {
+  mkdirSync(storageDir, { recursive: true })
+}
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, storageDir)
+  },
+  filename: (_req, file, cb) => {
+    const user = _req.user
+    const ext = extname(file.originalname)
+    const uniqueName = `avatar_${user?.userId || Date.now()}_${Math.random().toString(36).slice(2)}${ext}`
+    cb(null, uniqueName)
+  },
+})
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(new Error('仅支持 JPG/PNG/WEBP/GIF 格式'))
+    }
+  },
+})
 
 // 注册
 router.post('/register', async (req, res, next) => {
@@ -81,6 +116,44 @@ router.patch('/settings', authMiddleware, (req, res, next) => {
       return
     }
     res.json(user)
+  } catch (err) {
+    next(err)
+  }
+})
+
+// 上传/更新头像
+router.post('/avatar', authMiddleware, upload.single('avatar'), (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: '未认证' })
+      return
+    }
+    if (!req.file) {
+      res.status(400).json({ error: '未选择头像文件' })
+      return
+    }
+    const avatarUrl = `/avatars/${req.file.filename}`
+    updateUserAvatar(req.user.email, avatarUrl)
+    res.json({ avatar: avatarUrl })
+  } catch (err) {
+    next(err)
+  }
+})
+
+// 设置默认头像（SVG index）
+router.post('/avatar/default', authMiddleware, (req, res, next) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: '未认证' })
+      return
+    }
+    const { avatar } = req.body
+    if (!avatar) {
+      res.status(400).json({ error: '未提供头像标识' })
+      return
+    }
+    updateUserAvatar(req.user.email, avatar)
+    res.json({ avatar })
   } catch (err) {
     next(err)
   }

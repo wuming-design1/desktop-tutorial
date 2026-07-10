@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, h, ref, onMounted, onUnmounted } from 'vue'
+import { inject, h, ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { NDropdown, NAvatar, NButton, NTag } from 'naive-ui'
 import type { DropdownOption } from 'naive-ui'
@@ -7,11 +7,14 @@ import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
 import NotificationBell from '@/components/common/NotificationBell.vue'
+import AvatarPicker from '@/components/common/AvatarPicker.vue'
 
 const router = useRouter()
 const app = useAppStore()
 const authStore = useAuthStore()
 const openLogin = inject<() => void>('openLogin', () => {})
+
+const showAvatarPicker = ref(false)
 
 // 实时时钟
 const now = ref('')
@@ -22,6 +25,11 @@ onMounted(() => {
   }
   update()
   timer = setInterval(update, 1000)
+  // 初始化默认头像颜色
+  const av = authStore.user?.avatar
+  if (av && defaultAvatarMap[av]) {
+    defaultAvatarColors.value = defaultAvatarMap[av]
+  }
 })
 onUnmounted(() => {
   if (timer) clearInterval(timer)
@@ -50,6 +58,7 @@ const userMenuOptions = computed<DropdownOption[]>(() => {
       disabled: true,
     },
     { type: 'divider', key: 'd0' },
+    { label: '更换头像', key: 'avatar' },
     { label: '管理凭证', key: 'credentials' },
     { label: '系统设置', key: 'settings' },
   ]
@@ -66,7 +75,9 @@ const handleMoreSelect = (key: string) => {
 }
 
 const handleUserSelect = (key: string) => {
-  if (key === 'credentials') {
+  if (key === 'avatar') {
+    showAvatarPicker.value = true
+  } else if (key === 'credentials') {
     openLogin()
   } else if (key === 'settings') {
     router.push('/settings')
@@ -80,6 +91,34 @@ const handleUserSelect = (key: string) => {
 
 const doRefresh = () => {
   app.updateTime()
+}
+
+// 头像 URL（上传的图片需要加后端地址前缀）
+const avatarSrc = computed(() => {
+  const av = authStore.user?.avatar
+  if (av && av.startsWith('/avatars/')) {
+    return `/api${av}` // Vite proxy 会转发到后端
+  }
+  return null
+})
+
+// 默认头像颜色
+const defaultAvatarColors = ref(['#6C5CE7', '#A29BFE'])
+const defaultAvatarMap: Record<string, string[]> = {
+  av1: ['#6C5CE7', '#A29BFE'],
+  av2: ['#00B894', '#55EFC4'],
+  av3: ['#E17055', '#FAB1A0'],
+  av4: ['#0984E3', '#74B9FF'],
+  av5: ['#D63031', '#FF7675'],
+  av6: ['#00CEC9', '#81ECEC'],
+  av7: ['#FDCB6E', '#FFEAA7'],
+  av8: ['#E84393', '#FD79A8'],
+}
+
+function onAvatarUpdated(av: string) {
+  if (defaultAvatarMap[av]) {
+    defaultAvatarColors.value = defaultAvatarMap[av]
+  }
 }
 </script>
 
@@ -128,15 +167,31 @@ const doRefresh = () => {
         <NotificationBell />
         <NDropdown trigger="click" :options="userMenuOptions" :on-select="handleUserSelect" placement="bottom-end">
           <div class="user-trigger">
-            <NAvatar size="small" class="user-avatar" :style="{ background: 'var(--primary-gradient)', cursor: 'pointer' }">
-              <span style="font-size: 14px;font-weight:600">{{ authStore.avatarLetter }}</span>
-            </NAvatar>
+            <div class="user-avatar-wrap">
+              <img v-if="avatarSrc" :src="avatarSrc" class="user-avatar-img" />
+              <svg v-else-if="authStore.user?.avatar" class="user-avatar-img" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="20" :fill="defaultAvatarColors[0]" />
+                <circle cx="20" cy="20" r="20" fill="url(#hdr-grad)" />
+                <text x="20" y="25" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="sans-serif">{{ authStore.avatarLetter }}</text>
+                <defs>
+                  <linearGradient id="hdr-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" :stop-color="defaultAvatarColors[0]" />
+                    <stop offset="100%" :stop-color="defaultAvatarColors[1]" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <NAvatar v-else size="small" class="user-avatar" :style="{ background: 'var(--primary-gradient)', cursor: 'pointer' }">
+                <span style="font-size: 14px;font-weight:600">{{ authStore.avatarLetter }}</span>
+              </NAvatar>
+            </div>
             <span class="user-name">{{ authStore.displayName }}</span>
           </div>
         </NDropdown>
       </div>
     </div>
   </header>
+
+  <AvatarPicker v-model:show="showAvatarPicker" @updated="onAvatarUpdated" />
 </template>
 
 <style scoped>
@@ -281,6 +336,17 @@ const doRefresh = () => {
 }
 .user-trigger:hover {
   background: var(--bg-hover);
+}
+.user-avatar-wrap {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.user-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .user-avatar {
   transition: transform var(--transition);
