@@ -123,3 +123,33 @@ export async function apiPushSend(): Promise<{
   const res = await http.post('/push/send')
   return res.data
 }
+
+// ========== GitHub PR 创建 ==========
+
+export async function apiCreatePRUpload(formData: FormData): Promise<{
+  success: boolean
+  number: number
+  html_url: string
+  branch: string
+}> {
+  const res = await http.post('/github/pr/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return res.data
+}
+
+export async function apiCreatePRStaging(data: {
+  title: string
+  body: string
+  branch: string
+  repoPath: string
+}): Promise<{
+  success: boolean
+  number: number
+  html_url: string
+  branch: string
+  files: string[]
+}> {
+  const res = await http.post('/github/pr/staging', data)
+  return res.data
+}

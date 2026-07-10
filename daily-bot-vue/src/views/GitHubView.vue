@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { NCard, NTag, NButton, NSpin, useMessage } from 'naive-ui'
+import { NCard, NTag, NButton, NSpin, NInput, NRadioGroup, NRadio, NForm, NFormItem, NUpload, useMessage } from 'naive-ui'
 import axios from 'axios'
 import { useCredStore } from '@/stores/credStore'
+import { apiCreatePRUpload, apiCreatePRStaging } from '@/api/backend'
 
 const credStore = useCredStore()
 const message = useMessage()
@@ -29,6 +30,22 @@ const fallbackGitee = [
 ]
 
 const rankBadges = ['🥇', '🥈', '🥉']
+
+// ===== PR 创建表单 =====
+const prMode = ref<'upload' | 'staging'>('upload')
+const prTitle = ref('')
+const prBody = ref('')
+const prBranch = ref('')
+const prFilePath = ref('')
+const prFileContent = ref('')
+const prStagingPath = ref('')
+const prCreating = ref(false)
+const prResult = ref<{ number: number; html_url: string; branch: string; files?: string[] } | null>(null)
+
+const prModeOptions = [
+  { label: '上传文件', value: 'upload' },
+  { label: 'Git 暂存区', value: 'staging' },
+]
 
 async function testConnection() {
   if (!token.value || !repo.value) {
@@ -122,6 +139,64 @@ function openGitee(url: string) {
   window.open(url, '_blank')
 }
 
+// ===== 创建 PR =====
+async function handleCreatePR() {
+  if (!prTitle.value.trim()) {
+    message.warning('请输入 PR 标题')
+    return
+  }
+  if (!connected.value) {
+    message.warning('请先配置 GitHub 凭证')
+    return
+  }
+
+  prCreating.value = true
+  prResult.value = null
+
+  try {
+    if (prMode.value === 'upload') {
+      // 上传文件模式
+      if (!prFileContent.value.trim()) {
+        message.warning('请输入文件内容')
+        prCreating.value = false
+        return
+      }
+      const formData = new FormData()
+      formData.append('title', prTitle.value)
+      formData.append('body', prBody.value)
+      formData.append('branch', prBranch.value)
+      formData.append('filePath', prFilePath.value || 'file.txt')
+      formData.append('fileContent', prFileContent.value)
+
+      const result = await apiCreatePRUpload(formData)
+      prResult.value = result
+      message.success(`PR #${result.number} 创建成功`)
+    } else {
+      // Git 暂存区模式
+      if (!prStagingPath.value.trim()) {
+        message.warning('请输入本地仓库路径')
+        prCreating.value = false
+        return
+      }
+      const result = await apiCreatePRStaging({
+        title: prTitle.value,
+        body: prBody.value,
+        branch: prBranch.value,
+        repoPath: prStagingPath.value,
+      })
+      prResult.value = result
+      message.success(`PR #${result.number} 创建成功 (${result.files?.length || 0} 个文件)`)
+    }
+
+    // 刷新 PR 列表
+    fetchPRs()
+  } catch (e: any) {
+    message.error(`创建 PR 失败: ${e?.response?.data?.error || e.message}`)
+  } finally {
+    prCreating.value = false
+  }
+}
+
 onMounted(() => {
   if (connected.value) {
     fetchCommits()
@@ -189,6 +264,89 @@ onMounted(() => {
           </div>
         </div>
       </NSpin>
+    </NCard>
+
+    <!-- Create PR -->
+    <NCard title="➕ 创建拉取请求" class="content-card">
+      <div v-if="!connected" class="empty-hint">请先配置 GitHub Token 和仓库名称</div>
+      <div v-else class="pr-create-form">
+        <!-- 模式切换 -->
+        <div class="form-row">
+          <span class="form-label">创建方式</span>
+          <NRadioGroup v-model:value="prMode" name="pr-mode">
+            <NRadio v-for="opt in prModeOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </NRadio>
+          </NRadioGroup>
+        </div>
+
+        <!-- 上传文件模式 -->
+        <div v-if="prMode === 'upload'" class="form-section">
+          <div class="form-row">
+            <span class="form-label">文件路径</span>
+            <NInput v-model:value="prFilePath" placeholder="src/example.ts" style="flex:1" />
+          </div>
+          <div class="form-row">
+            <span class="form-label">文件内容</span>
+            <NInput
+              v-model:value="prFileContent"
+              type="textarea"
+              placeholder="输入文件内容..."
+              :autosize="{ minRows: 4, maxRows: 12 }"
+              style="flex:1"
+            />
+          </div>
+        </div>
+
+        <!-- Git 暂存区模式 -->
+        <div v-else class="form-section">
+          <div class="form-row">
+            <span class="form-label">仓库路径</span>
+            <NInput v-model:value="prStagingPath" placeholder="/path/to/your/git/repo" style="flex:1" />
+          </div>
+          <div class="form-hint">
+            后端服务器将读取该路径下 Git 暂存区（git add 后的文件），自动创建分支和 PR
+          </div>
+        </div>
+
+        <!-- 通用字段 -->
+        <div class="form-row">
+          <span class="form-label">新分支名</span>
+          <NInput v-model:value="prBranch" placeholder="留空自动生成" style="flex:1" />
+        </div>
+        <div class="form-row">
+          <span class="form-label">PR 标题</span>
+          <NInput v-model:value="prTitle" placeholder="PR 标题" style="flex:1" />
+        </div>
+        <div class="form-row">
+          <span class="form-label">PR 描述</span>
+          <NInput
+            v-model:value="prBody"
+            type="textarea"
+            placeholder="PR 描述（可选）"
+            :autosize="{ minRows: 2, maxRows: 6 }"
+            style="flex:1"
+          />
+        </div>
+
+        <div class="form-actions">
+          <NButton type="primary" :loading="prCreating" @click="handleCreatePR" size="large">
+            {{ prCreating ? '创建中...' : '🚀 创建 PR' }}
+          </NButton>
+        </div>
+
+        <!-- 结果 -->
+        <div v-if="prResult" class="pr-result">
+          <NTag type="success" size="small">PR 已创建</NTag>
+          <a :href="prResult.html_url" target="_blank" class="pr-result-link">
+            #{{ prResult.number }} → {{ prResult.html_url }}
+          </a>
+          <span class="pr-result-branch">分支: {{ prResult.branch }}</span>
+          <span v-if="prResult.files" class="pr-result-files">
+            包含 {{ prResult.files.length }} 个文件: {{ prResult.files.join(', ') }}
+          </span>
+        </div>
+      </div>
     </NCard>
 
     <!-- Gitee Trending -->
@@ -401,5 +559,66 @@ onMounted(() => {
   border-radius: 8px;
   background: var(--border);
   font-size: 0.72rem;
+}
+
+/* PR Create Form */
+.pr-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.form-label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+.form-section {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-left: 92px;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+.pr-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 184, 148, 0.08);
+  border: 1px solid rgba(0, 184, 148, 0.2);
+}
+.pr-result-link {
+  font-size: 0.85rem;
+  color: var(--primary);
+  word-break: break-all;
+}
+.pr-result-branch {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.pr-result-files {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  width: 100%;
 }
 </style>
