@@ -1,42 +1,19 @@
 import { onMounted, onUnmounted } from 'vue'
 
-interface Particle {
+interface Ripple {
   el: HTMLSpanElement
-  x: number
-  y: number
-  vx: number
-  vy: number
-  life: number
-  maxLife: number
-  size: number
-  color: string
+  createdAt: number
 }
 
-const COLORS = [
-  '#6C5CE7', '#A29BFE', '#00B894', '#FDCB6E',
-  '#FF7675', '#74B9FF', '#FD79A8', '#55EFC4',
-]
+const DURATION = 400 // 波纹持续时间 ms
 
 export function useClickEffect() {
-  let particles: Particle[] = []
+  let ripples: Ripple[] = []
   let rafId = 0
-  let container: HTMLDivElement | null = null
 
-  function createParticle(x: number, y: number) {
+  function createRipple(x: number, y: number) {
     const el = document.createElement('span')
-    const size = Math.random() * 8 + 4
-    const angle = Math.random() * Math.PI * 2
-    const speed = Math.random() * 3 + 2
-    const life = Math.random() * 600 + 400
-
-    const particle: Particle = {
-      el, x, y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 2,
-      life, maxLife: life,
-      size,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    }
+    const size = 30
 
     el.style.cssText = `
       position: fixed;
@@ -45,46 +22,34 @@ export function useClickEffect() {
       width: ${size}px;
       height: ${size}px;
       border-radius: 50%;
-      background: ${particle.color};
+      border: 2px solid rgba(108, 92, 231, 0.5);
+      background: rgba(108, 92, 231, 0.08);
       pointer-events: none;
       z-index: 99999;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 1;
     `
     document.body.appendChild(el)
-    particles.push(particle)
-  }
 
-  function animate() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i]
-      p.life -= 16
-      if (p.life <= 0) {
-        p.el.remove()
-        particles.splice(i, 1)
-        continue
-      }
-      const progress = 1 - p.life / p.maxLife
-      p.x += p.vx
-      p.y += p.vy
-      p.vy += 0.05 // gravity
-      p.el.style.left = `${p.x}px`
-      p.el.style.top = `${p.y}px`
-      p.el.style.opacity = `${1 - progress}`
-      p.el.style.transform = `translate(-50%, -50%) scale(${1 - progress * 0.5})`
-    }
-    if (particles.length > 0) {
-      rafId = requestAnimationFrame(animate)
-    }
+    // 触发重排后立即设置动画目标
+    requestAnimationFrame(() => {
+      el.style.transition = `all ${DURATION}ms cubic-bezier(0, 0.5, 0.5, 1)`
+      el.style.transform = `translate(-50%, -50%) scale(3)`
+      el.style.opacity = '0'
+    })
+
+    const ripple: Ripple = { el, createdAt: Date.now() }
+    ripples.push(ripple)
+
+    // 动画结束后移除
+    setTimeout(() => {
+      el.remove()
+      ripples = ripples.filter(r => r !== ripple)
+    }, DURATION + 50)
   }
 
   function onClick(e: MouseEvent) {
-    const count = Math.floor(Math.random() * 4) + 6
-    for (let i = 0; i < count; i++) {
-      createParticle(e.clientX, e.clientY)
-    }
-    if (!rafId) {
-      rafId = requestAnimationFrame(animate)
-    }
+    createRipple(e.clientX, e.clientY)
   }
 
   onMounted(() => {
@@ -94,7 +59,7 @@ export function useClickEffect() {
   onUnmounted(() => {
     document.removeEventListener('click', onClick)
     if (rafId) cancelAnimationFrame(rafId)
-    particles.forEach(p => p.el.remove())
-    particles = []
+    ripples.forEach(r => r.el.remove())
+    ripples = []
   })
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, h } from 'vue'
+import { inject, h, ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { NDropdown, NAvatar, NButton, NTag } from 'naive-ui'
 import type { DropdownOption } from 'naive-ui'
@@ -12,6 +12,20 @@ const router = useRouter()
 const app = useAppStore()
 const authStore = useAuthStore()
 const openLogin = inject<() => void>('openLogin', () => {})
+
+// 实时时钟
+const now = ref('')
+let timer: ReturnType<typeof setInterval> | null = null
+onMounted(() => {
+  const update = () => {
+    now.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  }
+  update()
+  timer = setInterval(update, 1000)
+})
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 
 const moreMenuOptions: DropdownOption[] = [
   { label: '天气', key: '/weather' },
@@ -103,7 +117,7 @@ const doRefresh = () => {
       <div class="header-right">
         <span class="time-display">
           <span class="status-dot"></span>
-          {{ app.lastUpdateTime || '--:--' }}
+          {{ now || '--:--' }}
         </span>
         <button class="icon-btn refresh-btn" :class="{ spinning: false }" @click="doRefresh" title="刷新">
           <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
