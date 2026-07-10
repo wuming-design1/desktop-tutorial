@@ -67,14 +67,6 @@ const handleUserSelect = (key: string) => {
 const doRefresh = () => {
   app.updateTime()
 }
-
-const roleLabel = computed(() => {
-  switch (authStore.user?.role) {
-    case 'admin': return '管理员'
-    case 'viewer': return '观察者'
-    default: return '成员'
-  }
-})
 </script>
 
 <template>
@@ -82,8 +74,19 @@ const roleLabel = computed(() => {
     <div class="header-inner">
       <div class="header-left">
         <RouterLink to="/" class="logo-link">
-          <span class="logo-icon">🍌</span>
-          <span class="logo-text">WorkflowBot</span>
+          <svg class="logo-svg" viewBox="0 0 32 32" fill="none">
+            <rect x="2" y="14" width="6" height="16" rx="2" fill="url(#hl1)" />
+            <rect x="11" y="8" width="6" height="22" rx="2" fill="url(#hl2)" />
+            <rect x="20" y="3" width="6" height="27" rx="2" fill="url(#hl3)" />
+            <rect x="29" y="11" width="2" height="18" rx="1" fill="url(#hl4)" />
+            <defs>
+              <linearGradient id="hl1" x1="2" y1="14" x2="8" y2="30"><stop stop-color="#6C5CE7"/><stop offset="1" stop-color="#A29BFE"/></linearGradient>
+              <linearGradient id="hl2" x1="11" y1="8" x2="17" y2="30"><stop stop-color="#6C5CE7"/><stop offset="1" stop-color="#74B9FF"/></linearGradient>
+              <linearGradient id="hl3" x1="20" y1="3" x2="26" y2="30"><stop stop-color="#00B894"/><stop offset="1" stop-color="#55EFC4"/></linearGradient>
+              <linearGradient id="hl4" x1="29" y1="11" x2="31" y2="29"><stop stop-color="#A29BFE"/><stop offset="1" stop-color="#6C5CE7"/></linearGradient>
+            </defs>
+          </svg>
+          <span class="logo-text">FlowBoard</span>
         </RouterLink>
       </div>
 
@@ -103,7 +106,9 @@ const roleLabel = computed(() => {
           {{ app.lastUpdateTime || '--:--' }}
         </span>
         <button class="icon-btn refresh-btn" :class="{ spinning: false }" @click="doRefresh" title="刷新">
-          <span class="refresh-icon">🔄</span>
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
         </button>
         <ThemeToggle />
         <NotificationBell />
@@ -147,8 +152,10 @@ const roleLabel = computed(() => {
   text-decoration: none;
   color: var(--text-primary);
 }
-.logo-icon {
-  font-size: 1.3rem;
+.logo-svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
 }
 .logo-text {
   font-size: 1rem;
@@ -209,6 +216,11 @@ const roleLabel = computed(() => {
   border-radius: 50%;
   background: var(--success);
   flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 .icon-btn {
   display: inline-flex;
@@ -222,13 +234,20 @@ const roleLabel = computed(() => {
   cursor: pointer;
   transition: all var(--transition);
   padding: 0;
-  font-size: 0.9rem;
 }
 .icon-btn:hover {
   border-color: var(--primary);
   box-shadow: 0 0 12px rgba(108, 92, 231, 0.15);
 }
-.refresh-btn:active .refresh-icon {
+.icon-svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+}
+.icon-btn:hover .icon-svg {
+  color: var(--primary);
+}
+.refresh-btn:active .icon-svg {
   animation: spin 0.6s linear;
 }
 @keyframes spin {

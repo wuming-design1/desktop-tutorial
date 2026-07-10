@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NCard, NForm, NFormItem, NInput, NButton, NAlert, NSpace, NDivider } from 'naive-ui'
+import { NCard, NForm, NFormItem, NInput, NButton, NAlert } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { login, register } from '@/api/auth'
@@ -13,7 +13,6 @@ const authStore = useAuthStore()
 
 const isLogin = computed(() => route.name === 'login')
 const title = computed(() => isLogin.value ? '登录' : '注册')
-const subtitle = computed(() => isLogin.value ? '欢迎回来' : '创建新账号')
 
 const formRef = ref()
 const loading = ref(false)
@@ -89,93 +88,103 @@ function switchMode() {
     router.push({ name: 'login', query: route.query })
   }
 }
-
-function fillTestAccount() {
-  form.value.email = 'admin@demo.com'
-  form.value.password = '123456'
-  error.value = ''
-}
 </script>
 
 <template>
   <div class="auth-page">
-    <div class="auth-bg">
-      <div class="bg-glow bg-glow-1" />
-      <div class="bg-glow bg-glow-2" />
+    <!-- 浮动几何装饰 -->
+    <div class="floating-shapes">
+      <div class="shape shape-1" />
+      <div class="shape shape-2" />
+      <div class="shape shape-3" />
+      <div class="shape shape-4" />
+      <div class="shape shape-5" />
+      <div class="shape shape-6" />
     </div>
+    <!-- 背景光晕 -->
+    <div class="bg-glow bg-glow-1" />
+    <div class="bg-glow bg-glow-2" />
+    <div class="bg-glow bg-glow-3" />
+
     <div class="auth-container">
+      <!-- 品牌 -->
       <div class="auth-brand">
-        <h1 class="brand-title">📊 团队智能看板</h1>
-        <p class="brand-desc">多源数据聚合 · 实时追踪 · 智能分析</p>
+        <div class="brand-icon">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="20" width="8" height="24" rx="2" fill="url(#g1)" />
+            <rect x="16" y="12" width="8" height="32" rx="2" fill="url(#g2)" />
+            <rect x="28" y="4" width="8" height="40" rx="2" fill="url(#g3)" />
+            <rect x="40" y="16" width="4" height="28" rx="2" fill="url(#g4)" />
+            <defs>
+              <linearGradient id="g1" x1="4" y1="20" x2="12" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6C5CE7"/><stop offset="1" stop-color="#A29BFE"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="16" y1="12" x2="24" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6C5CE7"/><stop offset="1" stop-color="#74B9FF"/>
+              </linearGradient>
+              <linearGradient id="g3" x1="28" y1="4" x2="36" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#00B894"/><stop offset="1" stop-color="#55EFC4"/>
+              </linearGradient>
+              <linearGradient id="g4" x1="40" y1="16" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#A29BFE"/><stop offset="1" stop-color="#6C5CE7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 class="brand-title">FlowBoard</h1>
+        <p class="brand-desc">轻量团队工作流看板</p>
       </div>
+
+      <!-- 登录卡片 -->
       <NCard class="auth-card glass-card">
         <h2 class="auth-title">{{ title }}</h2>
-        <p class="auth-subtitle">{{ subtitle }}</p>
-        <NDivider style="margin: 12px 0" />
+        <p class="auth-subtitle">{{ isLogin ? '欢迎回来，请登录你的账号' : '创建一个新账号开始使用' }}</p>
 
-        <NAlert v-if="error" type="error" :bordered="false" style="margin-bottom: 16px">
+        <NAlert v-if="error" type="error" :bordered="false" style="margin-bottom: 20px">
           {{ error }}
-        </NAlert>
-
-        <!-- 测试账号提示 -->
-        <NAlert v-if="isLogin" type="info" :bordered="false" style="margin-bottom: 16px;cursor:pointer" @click="fillTestAccount" :title="'测试账号：admin@demo.com / 123456（管理员）'">
-          <template #header>
-            <div class="test-account">
-              <span>测试账号：</span>
-              <code class="test-code">admin@demo.com</code>
-              <span> / </span>
-              <code class="test-code">123456</code>
-              <span>（管理员）</span>
-              <span class="test-hint">点击自动填充</span>
-            </div>
-          </template>
         </NAlert>
 
         <NForm ref="formRef" :model="form" :rules="rules" label-placement="top">
           <NFormItem v-if="!isLogin" label="用户名" path="username">
             <NInput
               v-model:value="form.username"
-              placeholder="请输入用户名"
+              placeholder="你的名字"
               :maxlength="20"
               clearable
-            >
-              <template #prefix>👤</template>
-            </NInput>
+              size="large"
+            />
           </NFormItem>
 
           <NFormItem label="邮箱" path="email">
             <NInput
               v-model:value="form.email"
-              placeholder="请输入邮箱"
+              placeholder="your@email.com"
               type="email"
               clearable
-            >
-              <template #prefix>📧</template>
-            </NInput>
+              size="large"
+            />
           </NFormItem>
 
           <NFormItem label="密码" path="password">
             <NInput
               v-model:value="form.password"
-              placeholder="请输入密码"
+              placeholder="••••••••"
               type="password"
               show-password-on="click"
               clearable
-            >
-              <template #prefix>🔒</template>
-            </NInput>
+              size="large"
+            />
           </NFormItem>
 
           <NFormItem v-if="!isLogin" label="确认密码" path="confirmPassword">
             <NInput
               v-model:value="form.confirmPassword"
-              placeholder="请再次输入密码"
+              placeholder="再次输入密码"
               type="password"
               show-password-on="click"
               clearable
-            >
-              <template #prefix>🔒</template>
-            </NInput>
+              size="large"
+            />
           </NFormItem>
 
           <NButton
@@ -184,13 +193,13 @@ function fillTestAccount() {
             :loading="loading"
             @click="handleSubmit"
             size="large"
-            style="margin-top: 8px"
+            class="submit-btn"
           >
-            {{ isLogin ? '登录' : '注册' }}
+            {{ isLogin ? '登 录' : '注 册' }}
           </NButton>
 
           <div class="auth-switch">
-            <span>{{ isLogin ? '没有账号？' : '已有账号？' }}</span>
+            <span>{{ isLogin ? '还没有账号？' : '已有账号？' }}</span>
             <NButton text type="primary" @click="switchMode">
               {{ isLogin ? '立即注册' : '去登录' }}
             </NButton>
@@ -209,31 +218,91 @@ function fillTestAccount() {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: var(--bg-body);
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 25%, #f8f9fc 50%, #eef2ff 75%, #f5f3ff 100%);
 }
 
-.auth-bg {
+/* 浮动几何装饰 */
+.floating-shapes {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  overflow: hidden;
 }
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+.shape-1 {
+  width: 300px; height: 300px;
+  background: var(--primary);
+  top: -80px; left: -60px;
+  animation: floatShape 12s ease-in-out infinite;
+}
+.shape-2 {
+  width: 200px; height: 200px;
+  background: var(--info);
+  top: 20%; right: -40px;
+  animation: floatShape 15s ease-in-out infinite reverse;
+}
+.shape-3 {
+  width: 140px; height: 140px;
+  background: var(--success);
+  bottom: 15%; left: 10%;
+  border-radius: 30%;
+  animation: floatShape 10s ease-in-out infinite 2s;
+}
+.shape-4 {
+  width: 100px; height: 100px;
+  background: var(--warning);
+  top: 10%; left: 25%;
+  border-radius: 20%;
+  animation: floatShape 8s ease-in-out infinite 1s;
+}
+.shape-5 {
+  width: 180px; height: 180px;
+  background: var(--danger);
+  bottom: 5%; right: 20%;
+  opacity: 0.04;
+  animation: floatShape 14s ease-in-out infinite 3s;
+}
+.shape-6 {
+  width: 80px; height: 80px;
+  background: var(--primary-light);
+  top: 50%; left: 60%;
+  border-radius: 16px;
+  animation: floatShape 9s ease-in-out infinite 4s;
+}
+
+@keyframes floatShape {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate(20px, -30px) rotate(5deg) scale(1.1); }
+  50% { transform: translate(-15px, 20px) rotate(-3deg) scale(0.95); }
+  75% { transform: translate(25px, 10px) rotate(7deg) scale(1.05); }
+}
+
+/* 背景光晕 */
 .bg-glow {
   position: absolute;
-  width: 500px;
-  height: 500px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.15;
+  filter: blur(80px);
+  pointer-events: none;
 }
 .bg-glow-1 {
-  top: -100px;
-  left: -100px;
-  background: var(--primary);
+  width: 400px; height: 400px;
+  top: -100px; left: -100px;
+  background: rgba(108, 92, 231, 0.08);
 }
 .bg-glow-2 {
-  bottom: -100px;
-  right: -100px;
-  background: var(--info);
+  width: 350px; height: 350px;
+  bottom: -80px; right: -80px;
+  background: rgba(116, 185, 255, 0.06);
+}
+.bg-glow-3 {
+  width: 250px; height: 250px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 184, 148, 0.04);
 }
 
 .auth-container {
@@ -242,88 +311,92 @@ function fillTestAccount() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
 }
 
+/* Brand */
 .auth-brand {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.brand-icon {
+  width: 56px;
+  height: 56px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.1);
+}
+.brand-icon svg {
+  width: 100%;
+  height: 100%;
 }
 .brand-title {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 700;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 .brand-desc {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
+/* Card */
 .auth-card {
-  width: 420px;
+  width: 400px;
   max-width: 90vw;
-  padding: 8px;
+  padding: 4px;
 }
 
 .auth-title {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 4px;
+  text-align: center;
 }
 .auth-subtitle {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  margin: 4px 0 0;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.submit-btn {
+  margin-top: 4px;
+  height: 44px;
+  font-size: 0.95rem;
+  letter-spacing: 2px;
 }
 
 .auth-switch {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;
-  margin-top: 16px;
-  font-size: 0.85rem;
+  gap: 2px;
+  margin-top: 20px;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .glass-card {
-  background: var(--glass-bg);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-}
-
-.test-account {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-size: 0.85rem;
-}
-.test-code {
-  background: rgba(108, 92, 231, 0.12);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 0.85rem;
-  color: var(--primary);
-}
-.test-hint {
-  font-size: 0.75rem;
-  color: var(--primary);
-  margin-left: 8px;
-  animation: breathe 2s ease-in-out infinite;
-}
-
-@keyframes breathe {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  box-shadow: 0 8px 40px rgba(108, 92, 231, 0.08), 0 2px 8px rgba(0,0,0,0.04);
 }
 </style>

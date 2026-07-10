@@ -13,6 +13,7 @@ import SearchModal from '@/components/common/SearchModal.vue'
 import LoginModal from '@/components/common/LoginModal.vue'
 import { useTheme } from '@/composables/useTheme'
 import { useKeyboard } from '@/composables/useKeyboard'
+import { useClickEffect } from '@/composables/useClickEffect'
 import { useSummaryStore } from '@/stores/summary'
 import { useCredStore } from '@/stores/credStore'
 import { useAuthStore } from '@/stores/auth'
@@ -62,6 +63,9 @@ useKeyboard([
     },
   },
 ])
+
+// 全局点击粒子特效
+useClickEffect()
 
 // 用户登录后重新加载各 Store 的隔离数据
 // 不在此处加载数据（demo/real），由各页面根据当前模式自行加载

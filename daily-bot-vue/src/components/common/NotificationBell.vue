@@ -17,7 +17,9 @@ const typeColors: Record<string, string> = {
     <template #trigger>
       <button class="bell-btn">
         <NBadge :value="store.unreadCount" :max="99" :show="store.unreadCount > 0">
-          <span class="bell-icon">🔔</span>
+          <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
         </NBadge>
       </button>
     </template>
@@ -65,7 +67,13 @@ const typeColors: Record<string, string> = {
   box-shadow: 0 0 12px rgba(108, 92, 231, 0.15);
 }
 .bell-icon {
-  font-size: 1rem;
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+  transition: color var(--transition);
+}
+.bell-btn:hover .bell-icon {
+  color: var(--primary);
 }
 .notif-popover {
   padding: 4px 0;
