@@ -10,7 +10,7 @@ import { useChart } from '@/composables/useChart'
 
 use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
 
-const { chartRef, option, setOption } = useChart()
+const { chartRef: _chartRef, option, setOption } = useChart()
 
 const data = [
   { name: '进行中', value: 12 },
@@ -77,7 +77,7 @@ setOption(chartOption.value)
     </div>
     <div class="chart-body">
       <VChart
-        ref="chartRef"
+        ref="_chartRef"
         :option="option"
         autoresize
         style="height: 260px; width: 100%;"

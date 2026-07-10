@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, UserSettings } from '@/api/types'
-import { apiMe, apiRefreshToken } from '@/api/backend'
+import { apiRefreshToken } from '@/api/backend'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)

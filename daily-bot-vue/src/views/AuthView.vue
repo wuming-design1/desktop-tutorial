@@ -5,8 +5,6 @@ import { NCard, NForm, NFormItem, NInput, NButton, NAlert } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { apiLogin, apiRegister } from '@/api/backend'
-import type { LoginRequest, RegisterRequest } from '@/api/types'
-
 const router = useRouter()
 const route = useRoute()
 const message = useMessage()
@@ -160,7 +158,7 @@ function switchMode() {
             <NInput
               v-model:value="form.email"
               placeholder="your@email.com"
-              type="email"
+              type="text"
               clearable
               size="large"
             />

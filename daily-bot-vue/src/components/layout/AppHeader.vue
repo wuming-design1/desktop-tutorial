@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, h, ref, computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
-import { NDropdown, NAvatar, NButton, NTag } from 'naive-ui'
+import { NDropdown, NAvatar } from 'naive-ui'
 import type { DropdownOption } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'

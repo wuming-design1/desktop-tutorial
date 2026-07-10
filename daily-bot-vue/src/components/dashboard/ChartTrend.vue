@@ -10,7 +10,7 @@ import { useChart } from '@/composables/useChart'
 
 use([LineChart, GridComponent, TooltipComponent, TitleComponent, CanvasRenderer])
 
-const { chartRef, option, setOption } = useChart()
+const { chartRef: _chartRef, option, setOption } = useChart()
 
 const dates = ['07-03', '07-04', '07-05', '07-06', '07-07', '07-08', '07-09']
 const values = [8, 12, 6, 15, 10, 18, 12]
@@ -94,7 +94,7 @@ setOption(chartOption.value)
     </div>
     <div class="chart-body">
       <VChart
-        ref="chartRef"
+        ref="_chartRef"
         :option="option"
         autoresize
         style="height: 220px; width: 100%;"

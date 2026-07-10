@@ -19,14 +19,18 @@ interface MetricCard {
 
 const cards = computed<MetricCard[]>(() => {
   const s = store.stats
+  // Calculate commitChangePercent from commitsChange
+  const commitChangePercent = s?.commitsChange != null && s?.commits > 0
+    ? Math.round((s.commitsChange / s.commits) * 100)
+    : 0
   return [
     {
       title: '今日提交',
-      value: s?.todayCommits ?? 0,
-      suffix: s?.commitChangePercent != null
-        ? `${s.commitChangePercent > 0 ? '+' : ''}${s.commitChangePercent}%`
+      value: s?.commits ?? 0,
+      suffix: commitChangePercent !== 0
+        ? `${commitChangePercent > 0 ? '+' : ''}${commitChangePercent}%`
         : '',
-      trend: s?.commitChangePercent ?? 0,
+      trend: commitChangePercent,
       icon: '📝',
       route: '/github',
       color: '#4F6EF7',
@@ -34,9 +38,9 @@ const cards = computed<MetricCard[]>(() => {
     },
     {
       title: '待处理任务',
-      value: s?.pendingTasks ?? 0,
-      suffix: s?.urgentCount ? `${s.urgentCount} 紧急` : '',
-      trend: (s?.urgentCount ?? 0) > 0 ? -1 : 0,
+      value: s?.tasks ?? 0,
+      suffix: s?.urgentTasks ? `${s.urgentTasks} 紧急` : '',
+      trend: (s?.urgentTasks ?? 0) > 0 ? -1 : 0,
       icon: '📋',
       route: '/feishu',
       color: '#F59E0B',
@@ -54,7 +58,7 @@ const cards = computed<MetricCard[]>(() => {
     },
     {
       title: '代码覆盖率',
-      value: s?.codeCoverage ?? 0,
+      value: s?.coverage ?? 0,
       suffix: '%',
       trend: 0,
       icon: '🛡️',

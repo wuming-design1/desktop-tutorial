@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NButton, NModal, NCard, NSpace, useMessage } from 'naive-ui'
+import { NButton, NModal, NCard, useMessage } from 'naive-ui'
 import { apiUploadAvatar, apiSetDefaultAvatar } from '@/api/backend'
 import { useAuthStore } from '@/stores/auth'
 

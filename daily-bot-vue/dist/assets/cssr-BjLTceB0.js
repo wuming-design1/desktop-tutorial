@@ -1,0 +1,1 @@
+import{In as e,Pn as t,rn as n}from"./_plugin-vue_export-helper-DbWEi0S_.js";import{n as r}from"./utils-BqRZfCpA.js";var i=r?document?.fonts?.ready:void 0,a=!1;i===void 0?a=!0:i.then(()=>{a=!0});function o(n){if(a)return;let r=!1;e(()=>{a||i?.then(()=>{r||n()})}),t(()=>{r=!0})}var{c:s}=n(),c=`vueuc-style`;export{c as n,o as r,s as t};

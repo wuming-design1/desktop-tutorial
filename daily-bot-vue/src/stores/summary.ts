@@ -24,8 +24,8 @@ export const useSummaryStore = defineStore('summary', () => {
   const hasData = computed(() => data.value !== null)
 
   function reload() {
-    const d = getStorage(dataKey())
-    const t = getStorage(timeKey())
+    const d = getStorage<SummaryData>(dataKey())
+    const t = getStorage<string>(timeKey())
     if (d) data.value = d
     if (t) lastUpdated.value = t
   }

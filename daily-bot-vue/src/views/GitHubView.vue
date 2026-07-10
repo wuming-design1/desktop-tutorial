@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { NCard, NTag, NButton, NSpin, NInput, NRadioGroup, NRadio, NForm, NFormItem, NUpload, useMessage } from 'naive-ui'
+import { NCard, NTag, NButton, NSpin, NInput, NRadioGroup, NRadio, useMessage } from 'naive-ui'
 import axios from 'axios'
 import { useCredStore } from '@/stores/credStore'
 import { apiCreatePRUpload, apiCreatePRStaging } from '@/api/backend'

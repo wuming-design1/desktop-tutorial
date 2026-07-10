@@ -10,7 +10,7 @@ import { useChart } from '@/composables/useChart'
 
 use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
-const { chartRef, option, setOption } = useChart()
+const { chartRef: _chartRef, option, setOption } = useChart()
 
 const names = ['张三', '李四', '王五', '赵六', '孙七', '周八']
 const values = [28, 22, 18, 15, 10, 7]
@@ -60,7 +60,7 @@ const chartOption = computed<EChartsOption>(() => ({
   series: [
     {
       type: 'bar',
-      data: values.map((v, i) => ({
+      data: values.map((v, _i) => ({
         value: v,
         itemStyle: {
           color: {
@@ -109,7 +109,7 @@ setOption(chartOption.value)
     </div>
     <div class="chart-body">
       <VChart
-        ref="chartRef"
+        ref="_chartRef"
         :option="option"
         autoresize
         style="height: 250px; width: 100%;"

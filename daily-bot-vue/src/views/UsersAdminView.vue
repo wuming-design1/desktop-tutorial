@@ -2,7 +2,7 @@
 import { ref, onMounted, h } from 'vue'
 import { NCard, NTable, NButton, NInput, NSpace, NModal, NTag, NAlert, useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
-import { listUsers, deleteUser, resetUserPassword, updateUserRole } from '@/api/auth'
+import { listUsers, deleteUser, resetUserPassword } from '@/api/auth'
 import type { User } from '@/api/types'
 
 const authStore = useAuthStore()

@@ -10,7 +10,7 @@ interface TimelineItem {
   source: string
   author: string
   content: string
-  status: string
+  status?: string
 }
 
 const INITIAL_COUNT = 8

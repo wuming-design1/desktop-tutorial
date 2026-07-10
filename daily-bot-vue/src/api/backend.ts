@@ -1,5 +1,5 @@
 import http from './index'
-import type { User, AuthResponse, LoginRequest, RegisterRequest, SummaryData, ReportData, DashboardStats } from './types'
+import type { User, AuthResponse, LoginRequest, RegisterRequest, SummaryData, ReportData } from './types'
 
 // ========== 认证 ==========
 

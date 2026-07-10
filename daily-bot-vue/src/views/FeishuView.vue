@@ -152,7 +152,7 @@ const taskStatusMap: Record<FeishuTask['status'], { type: 'success' | 'warning' 
 
 const priorityMap: Record<FeishuTask['priority'], { type: 'success' | 'warning' | 'error' | 'default'; label: string }> = {
   low: { type: 'default', label: '低' },
-  medium: { type: 'info', label: '中' },
+  medium: { type: 'default', label: '中' },
   high: { type: 'warning', label: '高' },
   urgent: { type: 'error', label: '紧急' },
 }
@@ -184,7 +184,7 @@ function goToOrigin(task: FeishuTask) {
         </div>
         <div class="config-item">
           <span class="config-label">App ID</span>
-          <span class="config-value">{{ appId ? appId.value.slice(0, 8) + '***' : '未设置' }}</span>
+          <span class="config-value">{{ appId ? appId.slice(0, 8) + '***' : '未设置' }}</span>
         </div>
         <NButton type="primary" :loading="testing" @click="testConnection" size="small">
           {{ accessToken ? '重新连接' : '测试连接' }}

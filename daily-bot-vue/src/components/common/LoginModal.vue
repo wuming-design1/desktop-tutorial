@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { NModal, NInput, NButton, NSpace, NDivider, NTabs, NTabPane, NTag, NCheckbox } from 'naive-ui'
-import { useCredStore, PLATFORM_KEYS } from '@/stores/credStore'
+import { NModal, NInput, NButton, NSpace, NDivider, NTabs, NTabPane, NTag } from 'naive-ui'
+import { useCredStore } from '@/stores/credStore'
 
 const credStore = useCredStore()
 const visible = ref(false)

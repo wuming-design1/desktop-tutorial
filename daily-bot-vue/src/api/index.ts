@@ -48,7 +48,7 @@ http.interceptors.response.use(
 
     if (shouldRetry) {
       config._retryCount++
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY * config._retryCount))
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY * (config._retryCount ?? 0)))
       return http(config)
     }
 

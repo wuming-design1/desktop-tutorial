@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useDark, useToggle } from '@vueuse/core'
 
 export const useAppStore = defineStore('app', () => {
