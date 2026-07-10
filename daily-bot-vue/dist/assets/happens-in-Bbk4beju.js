@@ -1,1 +1,0 @@
-var e=[],t=new WeakMap;function n(){e.forEach(e=>e(...t.get(e))),e=[]}function r(r,...i){t.set(r,i),!e.includes(r)&&e.push(r)===1&&requestAnimationFrame(n)}function i(e,t){let{target:n}=e;for(;n;){if(n.dataset&&n.dataset[t]!==void 0)return!0;n=n.parentElement}return!1}export{r as n,i as t};
