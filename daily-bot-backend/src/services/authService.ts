@@ -132,8 +132,8 @@ export async function seedAdmin(): Promise<void> {
   const existing = findUserByEmail('admin@demo.com')
   if (existing) return
 
-  console.log('🔧 创建默认管理员账号: admin@demo.com / admin123')
-  const passwordHash = await bcrypt.hash('admin123', 10)
+  console.log('🔧 创建默认管理员账号: admin@demo.com / 123456')
+  const passwordHash = await bcrypt.hash('123456', 10)
   const now = new Date().toISOString()
 
   insertUser({
