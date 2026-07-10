@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { apiGetCredentials, apiSaveCredentials } from '@/api/backend'
 
 export const PLATFORM_KEYS: Record<string, { ids: string[]; envKeys: string[] }> = {
   github: { ids: ['gh-token','gh-repo'], envKeys: ['GITHUB_TOKEN','GITHUB_REPO'] },
@@ -10,30 +10,24 @@ export const PLATFORM_KEYS: Record<string, { ids: string[]; envKeys: string[] }>
   webhook: { ids: ['fs-webhook'], envKeys: ['FEISHU_WEBHOOK_URL'] },
 }
 
-function getStorageKey(): string {
-  const authStore = useAuthStore()
-  const uid = authStore.user?.id || 'anonymous'
-  return `wfbot_creds_${uid}`
-}
-
 export const useCredStore = defineStore('cred', () => {
-  const storageKey = computed(() => getStorageKey())
-  const creds = ref<Record<string,string>>(JSON.parse(localStorage.getItem(storageKey.value) || '{}'))
-
-  const showLogin = ref(!Object.values(creds.value).some(v => v))
+  const creds = ref<Record<string,string>>({})
+  const showLogin = ref(false)
   const hasAnyCredential = computed(() => Object.values(creds.value).some(v => v && v.trim()))
 
-  // 重新加载当前用户的凭证（切换用户后调用）
-  function reload() {
-    const key = storageKey.value
-    const raw = localStorage.getItem(key)
-    creds.value = raw ? JSON.parse(raw) : {}
-    showLogin.value = !Object.values(creds.value).some(v => v)
+  // 从后端加载凭证
+  async function reload() {
+    try {
+      const result = await apiGetCredentials()
+      creds.value = result.credentials || {}
+      showLogin.value = !Object.values(creds.value).some(v => v)
+    } catch {
+      creds.value = {}
+      showLogin.value = true
+    }
   }
 
   function saveCreds(c: Record<string, string>) {
-    const key = storageKey.value
-    localStorage.setItem(key, JSON.stringify(c))
     creds.value = c
   }
 
@@ -52,13 +46,25 @@ export const useCredStore = defineStore('cred', () => {
     return platforms.map(p => ({ key: p, label: labels[p], connected: isConnected(p) }))
   })
 
-  const saveFromForm = (fd: Record<string, string>) => {
+  async function saveFromForm(fd: Record<string, string>) {
     const nc: Record<string, string> = {}
-    Object.entries(PLATFORM_KEYS).forEach(([, cfg]) =>
+    for (const [platform, cfg] of Object.entries(PLATFORM_KEYS)) {
+      const platformCreds: Record<string, string> = {}
       cfg.ids.forEach((id, i) => {
-        if (fd[id] && fd[id].trim()) nc[cfg.envKeys[i]] = fd[id].trim()
+        if (fd[id] && fd[id].trim()) {
+          platformCreds[cfg.envKeys[i]] = fd[id].trim()
+          nc[cfg.envKeys[i]] = fd[id].trim()
+        }
       })
-    )
+      // 保存到后端
+      if (Object.keys(platformCreds).length > 0) {
+        try {
+          await apiSaveCredentials(platform, platformCreds)
+        } catch {
+          // 后端保存失败，暂存到本地
+        }
+      }
+    }
     saveCreds(nc)
     showLogin.value = false
   }

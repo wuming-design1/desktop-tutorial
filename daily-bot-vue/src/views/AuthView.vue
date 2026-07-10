@@ -4,7 +4,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { NCard, NForm, NFormItem, NInput, NButton, NAlert } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
-import { login, register } from '@/api/auth'
+import { apiLogin, apiRegister } from '@/api/backend'
+import type { LoginRequest, RegisterRequest } from '@/api/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -59,11 +60,11 @@ async function handleSubmit() {
   loading.value = true
   try {
     if (isLogin.value) {
-      const result = await login({ email: form.value.email, password: form.value.password })
+      const result = await apiLogin({ email: form.value.email, password: form.value.password })
       authStore.setAuth(result.token, result.user)
       message.success(`欢迎回来，${result.user.username}`)
     } else {
-      const result = await register({
+      const result = await apiRegister({
         username: form.value.username,
         email: form.value.email,
         password: form.value.password,

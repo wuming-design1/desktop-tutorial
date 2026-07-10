@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { NCard, NSelect, NGrid, NGi, NSwitch } from 'naive-ui'
+import { ref, computed, watch, onMounted } from 'vue'
+import { NCard, NSelect, NGrid, NGi, NSwitch, NSpin } from 'naive-ui'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent, TitleComponent } from 'echarts/components'
+import { apiGetReports } from '@/api/backend'
+import type { ReportData } from '@/api/types'
 
 use([CanvasRenderer, LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent, TitleComponent])
 
@@ -18,6 +20,33 @@ watch(dataMode, (val) => {
   localStorage.setItem(STORAGE_KEY, val)
 })
 const isDemo = computed(() => dataMode.value === 'demo')
+
+// 真实数据
+const realData = ref<ReportData | null>(null)
+const realLoading = ref(false)
+
+async function loadRealReports() {
+  realLoading.value = true
+  try {
+    realData.value = await apiGetReports()
+  } catch {
+    realData.value = null
+  } finally {
+    realLoading.value = false
+  }
+}
+
+watch(dataMode, (val) => {
+  if (val === 'real') {
+    loadRealReports()
+  }
+})
+
+onMounted(() => {
+  if (dataMode.value === 'real') {
+    loadRealReports()
+  }
+})
 
 const timeRange = ref('week')
 const timeOptions = [
@@ -132,6 +161,77 @@ const codeChangesOption = computed(() => {
   }
 })
 
+// --- 真实模式图表选项 ---
+const realCommitTrendOption = computed(() => {
+  if (!realData.value || realData.value.commitTrend.length === 0) return null
+  const data = realData.value.commitTrend
+  const labels = data.map(d => d.date.slice(5))
+  const values = data.map(d => d.value)
+  const prValues = realData.value.prTrend.map(d => d.value)
+  return {
+    tooltip: { trigger: 'axis' },
+    legend: { data: ['提交', 'PR'], bottom: 0, textStyle: { color: '#8A8AA8' } },
+    grid: { left: 40, right: 20, top: 20, bottom: 40 },
+    xAxis: { type: 'category', data: labels, axisLabel: { color: '#8A8AA8', fontSize: 11 } },
+    yAxis: { type: 'value', axisLabel: { color: '#8A8AA8' } },
+    series: [
+      { name: '提交', type: 'line', data: values, smooth: true, lineStyle: { color: '#6C5CE7', width: 2 }, itemStyle: { color: '#6C5CE7' }, areaStyle: { color: 'rgba(108,92,231,0.08)' } },
+      { name: 'PR', type: 'line', data: prValues, smooth: true, lineStyle: { color: '#00B894', width: 2 }, itemStyle: { color: '#00B894' }, areaStyle: { color: 'rgba(0,184,148,0.06)' } },
+    ],
+  }
+})
+
+const realTaskDistributionOption = computed(() => {
+  if (!realData.value || realData.value.taskDistribution.length === 0) return null
+  const data = realData.value.taskDistribution
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { bottom: 0, textStyle: { color: '#8A8AA8', fontSize: 11 } },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '45%'],
+      data: data.map(d => ({ name: d.name, value: d.value, itemStyle: { color: d.color } })),
+      label: { color: '#8A8AA8', fontSize: 10 },
+      emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.2)' } },
+    }],
+  }
+})
+
+const realMemberActivityOption = computed(() => {
+  if (!realData.value || realData.value.memberActivity.length === 0) return null
+  const data = realData.value.memberActivity
+  return {
+    tooltip: { trigger: 'axis' },
+    grid: { left: 50, right: 20, top: 20, bottom: 30 },
+    xAxis: { type: 'category', data: data.map(d => d.name), axisLabel: { color: '#8A8AA8', fontSize: 11 } },
+    yAxis: { type: 'value', axisLabel: { color: '#8A8AA8' } },
+    series: [{
+      type: 'bar', data: data.map(d => d.value), barWidth: '50%',
+      itemStyle: { borderRadius: [6, 6, 0, 0], color: '#6C5CE7' },
+      label: { show: true, position: 'top', color: '#8A8AA8', fontSize: 10 },
+    }],
+  }
+})
+
+const realHealthOption = computed(() => {
+  if (!realData.value || realData.value.healthStatus.length === 0) return null
+  const data = realData.value.healthStatus
+  return {
+    tooltip: { trigger: 'axis' },
+    grid: { left: 80, right: 20, top: 20, bottom: 30 },
+    xAxis: { type: 'value', name: '延迟 (ms)', axisLabel: { color: '#8A8AA8' } },
+    yAxis: { type: 'category', data: data.map(d => d.service), axisLabel: { color: '#8A8AA8', fontSize: 11 } },
+    series: [{
+      type: 'bar', data: data.map(d => ({
+        value: d.latency,
+        itemStyle: { color: d.status === 'healthy' ? '#00B894' : d.status === 'degraded' ? '#FDCB6E' : '#FF7675', borderRadius: [0, 4, 4, 0] },
+      })),
+      barWidth: '50%',
+    }],
+  }
+})
+
 </script>
 
 <template>
@@ -162,19 +262,49 @@ const codeChangesOption = computed(() => {
       </div>
     </div>
 
-    <!-- 真实模式空状态 -->
-    <div v-if="!isDemo" class="real-empty">
-      <div class="empty-icon">
-        <svg viewBox="0 0 64 64" fill="none" width="80" height="80">
-          <rect x="8" y="32" width="8" height="24" rx="2" fill="rgba(108,92,231,0.15)"/>
-          <rect x="20" y="24" width="8" height="32" rx="2" fill="rgba(108,92,231,0.2)"/>
-          <rect x="32" y="12" width="8" height="44" rx="2" fill="rgba(108,92,231,0.25)"/>
-          <rect x="44" y="20" width="8" height="36" rx="2" fill="rgba(108,92,231,0.18)"/>
-        </svg>
+    <!-- 真实模式 -->
+    <NSpin v-if="!isDemo" :show="realLoading" description="正在加载报表数据...">
+      <div v-if="realData" class="real-charts">
+        <NGrid :cols="2" :x-gap="20" :y-gap="20">
+          <NGi>
+            <NCard title="提交趋势" class="chart-card">
+              <VChart v-if="realCommitTrendOption" :option="realCommitTrendOption" autoresize style="height: 300px" />
+              <div v-else class="empty-hint">暂无提交数据</div>
+            </NCard>
+          </NGi>
+          <NGi>
+            <NCard title="任务分布" class="chart-card">
+              <VChart v-if="realTaskDistributionOption" :option="realTaskDistributionOption" autoresize style="height: 300px" />
+              <div v-else class="empty-hint">暂无任务分布数据</div>
+            </NCard>
+          </NGi>
+          <NGi>
+            <NCard title="成员活跃度" class="chart-card">
+              <VChart v-if="realMemberActivityOption" :option="realMemberActivityOption" autoresize style="height: 300px" />
+              <div v-else class="empty-hint">暂无活跃度数据</div>
+            </NCard>
+          </NGi>
+          <NGi>
+            <NCard title="服务健康检查" class="chart-card">
+              <VChart v-if="realHealthOption" :option="realHealthOption" autoresize style="height: 300px" />
+              <div v-else class="empty-hint">暂无健康数据</div>
+            </NCard>
+          </NGi>
+        </NGrid>
       </div>
-      <p class="empty-title">暂无报表数据</p>
-      <p class="empty-desc">请配置 GitHub 凭证后切换到真实模式，系统将自动拉取真实数据生成报表</p>
-    </div>
+      <div v-else-if="!realLoading" class="real-empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none" width="80" height="80">
+            <rect x="8" y="32" width="8" height="24" rx="2" fill="rgba(108,92,231,0.15)"/>
+            <rect x="20" y="24" width="8" height="32" rx="2" fill="rgba(108,92,231,0.2)"/>
+            <rect x="32" y="12" width="8" height="44" rx="2" fill="rgba(108,92,231,0.25)"/>
+            <rect x="44" y="20" width="8" height="36" rx="2" fill="rgba(108,92,231,0.18)"/>
+          </svg>
+        </div>
+        <p class="empty-title">暂无报表数据</p>
+        <p class="empty-desc">请配置 GitHub 凭证后切换到真实模式，系统将自动拉取真实数据生成报表</p>
+      </div>
+    </NSpin>
 
     <!-- 虚拟模式：2x2 Chart Grid -->
     <NGrid v-else :cols="2" :x-gap="20" :y-gap="20">

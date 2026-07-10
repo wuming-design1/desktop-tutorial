@@ -1,0 +1,1 @@
+import{un as e,zn as t}from"./_plugin-vue_export-helper-Dw8IhM_J.js";function n(n,r){return t(n,e=>{e!==void 0&&(r.value=e)}),e(()=>n.value===void 0?r.value:n.value)}export{n as t};

@@ -1,0 +1,10 @@
+# 忽略文件
+node_modules/
+dist/
+data/
+*.db
+*.db-wal
+*.db-shm
+.env
+.DS_Store
+*.log

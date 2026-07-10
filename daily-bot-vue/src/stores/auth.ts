@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, UserSettings } from '@/api/types'
+import { apiMe, apiRefreshToken } from '@/api/backend'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
@@ -20,15 +21,6 @@ export const useAuthStore = defineStore('auth', () => {
   function clearAuth() {
     token.value = null
     user.value = null
-    // 清除所有用户相关数据（凭证和汇总）
-    const keysToRemove = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && (key.startsWith('wfbot_creds_') || key.startsWith('wfbot_summary_') || key === 'wfbot_data_mode')) {
-        keysToRemove.push(key)
-      }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key))
   }
 
   function updateUser(updated: Partial<User>) {
@@ -46,8 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function refreshToken(): Promise<boolean> {
     try {
       if (!token.value) return false
-      const { refreshToken: doRefresh } = await import('@/api/auth')
-      const result = await doRefresh(token.value)
+      const result = await apiRefreshToken()
       if (result) {
         token.value = result.token
         return true

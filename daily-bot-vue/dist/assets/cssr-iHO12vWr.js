@@ -1,1 +1,0 @@
-import{Ut as e,_n as t,yn as n}from"./_plugin-vue_export-helper-Diu8tYPd.js";import{r}from"./flatten-Cufpov7j.js";var i=r?document?.fonts?.ready:void 0,a=!1;i===void 0?a=!0:i.then(()=>{a=!0});function o(e){if(a)return;let r=!1;n(()=>{a||i?.then(()=>{r||e()})}),t(()=>{r=!0})}var{c:s}=e(),c=`vueuc-style`;export{c as n,o as r,s as t};

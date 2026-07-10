@@ -130,3 +130,12 @@ export interface AuthResponse {
   user: User
   token: string
 }
+
+// 报表数据
+export interface ReportData {
+  commitTrend: TrendPoint[]
+  prTrend: TrendPoint[]
+  taskDistribution: PieSlice[]
+  memberActivity: BarItem[]
+  healthStatus: HealthStatus[]
+}
