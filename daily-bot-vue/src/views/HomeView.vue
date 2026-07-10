@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { NCard, NTag, NGrid, NGi, NCollapse, NCollapseItem, NProgress, NSpin, NSwitch, NAlert } from 'naive-ui'
 import { useSummaryStore } from '@/stores/summary'
 import { useAppStore } from '@/stores/app'
 import { useCredStore } from '@/stores/credStore'
 
+const router = useRouter()
 const summaryStore = useSummaryStore()
 const appStore = useAppStore()
 const credStore = useCredStore()
@@ -256,7 +258,7 @@ watch(dataMode, async (mode) => {
     <!-- 3-Column Chart Grid -->
     <NGrid :cols="3" :x-gap="20" :y-gap="20" class="chart-grid">
       <NGi>
-        <NCard title="📈 提交趋势 (本周)">
+        <NCard title="📈 提交趋势 (本周)" class="chart-card-clickable" @click="router.push('/reports')">
           <div class="chart-trend" v-if="chartTrendData.length > 0">
             <div class="trend-bars">
               <div
@@ -304,7 +306,7 @@ watch(dataMode, async (mode) => {
         </NCard>
       </NGi>
       <NGi>
-        <NCard title="👤 成员活跃度">
+        <NCard title="👤 成员活跃度" class="chart-card-clickable" @click="router.push('/reports')">
           <div class="chart-bar" v-if="chartBarData.length > 0">
             <div
               v-for="d in chartBarData"
@@ -543,6 +545,16 @@ watch(dataMode, async (mode) => {
   color: var(--text-muted);
   padding: 20px 0;
   font-size: 0.85rem;
+}
+
+/* Chart Card Clickable */
+.chart-card-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.chart-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.15);
 }
 
 /* Chart Trend */
