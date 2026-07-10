@@ -14,6 +14,10 @@ const http: AxiosInstance = axios.create({
 
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 如果已有 Authorization 头（如 admin token），不覆盖
+    if (config.headers?.Authorization) {
+      return config
+    }
     const authStore = useAuthStore()
     if (authStore.token && config.headers) {
       config.headers.Authorization = `Bearer ${authStore.token}`
@@ -49,9 +53,13 @@ http.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      const authStore = useAuthStore()
-      authStore.clearAuth()
-      window.location.hash = '#/login'
+      // 管理员 API 401 不跳转用户登录页
+      const isAdminUrl = error.config?.url?.startsWith('/admin/')
+      if (!isAdminUrl) {
+        const authStore = useAuthStore()
+        authStore.clearAuth()
+        window.location.hash = '#/login'
+      }
     }
 
     return Promise.reject(error)
