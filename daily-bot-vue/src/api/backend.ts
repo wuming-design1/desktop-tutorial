@@ -102,3 +102,24 @@ export async function apiHealthCheck(): Promise<{
   const res = await http.get('/health')
   return res.data
 }
+
+// ========== 消息推送 ==========
+
+export async function apiPushTest(): Promise<{ success: boolean }> {
+  const res = await http.post('/push/test')
+  return res.data
+}
+
+export async function apiPushSend(): Promise<{
+  success: boolean
+  preview: {
+    date: string
+    stats: { label: string; value: string }[]
+    summary: string
+    highlights: string[]
+  } | null
+  error?: string
+}> {
+  const res = await http.post('/push/send')
+  return res.data
+}

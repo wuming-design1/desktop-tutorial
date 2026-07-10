@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { NCard, NTag, NButton, useMessage } from 'naive-ui'
-import axios from 'axios'
 import { useCredStore } from '@/stores/credStore'
+import { apiPushTest, apiPushSend } from '@/api/backend'
 
 const credStore = useCredStore()
 const message = useMessage()
@@ -17,71 +17,52 @@ const pushPreview = ref<any>(null)
 
 async function testConnection() {
   if (!webhookUrl.value) {
-    message.warning('请先填写 Webhook URL')
+    message.warning('请先配置 Webhook URL（在管理凭证中设置）')
     return
   }
   testing.value = true
   try {
-    await axios.post(webhookUrl.value, {
-      msg_type: 'text',
-      content: { text: '🔔 连接测试 - 团队工作流智能看板' },
-    })
+    await apiPushTest()
     message.success('连接成功，测试消息已发送')
   } catch (e: any) {
-    message.error(`连接失败: ${e?.response?.data?.msg || e.message}`)
+    const errMsg = e?.response?.data?.error || e.message
+    message.error(`连接失败: ${errMsg}`)
   } finally {
     testing.value = false
   }
 }
 
-async function simulatePush() {
+async function sendPush() {
   if (!webhookUrl.value) {
-    message.warning('请先填写 Webhook URL')
+    message.warning('请先配置 Webhook URL（在管理凭证中设置）')
     return
   }
   pushing.value = true
   pushResult.value = 'idle'
   pushPreview.value = null
 
-  const previewCard = {
-    title: '📊 每日工作流报告',
-    date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }),
-    stats: [
-      { label: '今日提交', value: '24 次' },
-      { label: '任务完成', value: '85%' },
-      { label: '活跃成员', value: '8 人' },
-      { label: '代码审查', value: '12 次' },
-    ],
-    highlights: [
-      '张三 完成了 dashboard 模块重构',
-      'PR #128 已合并到 main 分支',
-      '飞书审批单 #20240709-001 已通过',
-    ],
-  }
-
   try {
-    await axios.post(webhookUrl.value, {
-      msg_type: 'interactive',
-      card: {
-        header: {
-          title: { tag: 'plain_text', content: '📊 每日工作流报告' },
-          template: 'blue',
-        },
-        elements: [
-          {
-            tag: 'div',
-            text: { tag: 'lark_md', content: `**日期:** ${previewCard.date}\n\n**今日提交:** 24 次 | **任务完成率:** 85%\n**活跃成员:** 8 人 | **代码审查:** 12 次\n\n---\n**🔥 亮点:**\n• 张三 完成了 dashboard 模块重构\n• PR #128 已合并到 main 分支\n• 飞书审批单 #20240709-001 已通过` },
-          },
-        ],
-      },
-    })
-    pushResult.value = 'success'
-    pushPreview.value = previewCard
-    message.success('推送模拟成功')
+    const result = await apiPushSend()
+
+    if (result.preview) {
+      pushPreview.value = {
+        title: '📊 每日工作流报告',
+        date: result.preview.date,
+        stats: result.preview.stats.map(s => ({ label: s.label, value: s.value })),
+        highlights: result.preview.highlights,
+      }
+    }
+
+    if (result.success) {
+      pushResult.value = 'success'
+      message.success('推送成功')
+    } else {
+      pushResult.value = 'error'
+      message.error(result.error || '推送失败')
+    }
   } catch (e: any) {
     pushResult.value = 'error'
-    pushPreview.value = previewCard
-    message.error(`推送失败: ${e?.response?.data?.msg || e.message}`)
+    message.error(`推送失败: ${e?.response?.data?.error || e.message}`)
   } finally {
     pushing.value = false
   }
@@ -114,14 +95,14 @@ async function simulatePush() {
     <!-- Simulate Push -->
     <NCard class="action-card">
       <div class="action-row">
-        <span class="action-desc">模拟推送每日工作流报告到飞书群</span>
+        <span class="action-desc">推送真实工作流数据到飞书群</span>
         <NButton
           type="primary"
           :loading="pushing"
-          @click="simulatePush"
+          @click="sendPush"
           size="large"
         >
-          {{ pushing ? '推送中...' : '📤 模拟推送' }}
+          {{ pushing ? '推送中...' : '📤 推送报告' }}
         </NButton>
       </div>
     </NCard>
