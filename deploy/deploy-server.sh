@@ -19,8 +19,7 @@ cd /home/user
 if [ -f "daily-bot-dist.zip" ]; then
   echo "已存在，跳过下载"
 else
-  curl -L -o daily-bot-dist.zip "https://github.com/wuming-design1/desktop-tutorial/raw/refs/heads/trae/agent-52JKNP/daily-bot-dist.zip" 2>/dev/null || \
-  curl -L -o daily-bot-dist.zip "https://gitee.com/wumingsljlxn/team-workflow-dashboard/raw/trae/agent-52JKNP/daily-bot-dist.zip"
+  curl -L -o daily-bot-dist.zip "https://github.com/wuming-design1/desktop-tutorial/raw/refs/heads/trae/agent-52JKNP/daily-bot-dist.zip"
 fi
 unzip -o daily-bot-dist.zip -d /home/user/
 cd /home/user/daily-bot-dist
