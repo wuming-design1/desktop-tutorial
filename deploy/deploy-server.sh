@@ -15,14 +15,14 @@ echo -e "${GREEN}========================================${NC}"
 
 # 1. 下载部署包
 echo -e "${YELLOW}[1/6] 下载部署包...${NC}"
-cd /home/user
+mkdir -p $HOME/workflow && cd $HOME/workflow
 if [ -f "daily-bot-dist.zip" ]; then
   echo "已存在，跳过下载"
 else
   curl -L -o daily-bot-dist.zip "https://github.com/wuming-design1/desktop-tutorial/raw/refs/heads/trae/agent-52JKNP/daily-bot-dist.zip"
 fi
-unzip -o daily-bot-dist.zip -d /home/user/
-cd /home/user/daily-bot-dist
+unzip -o daily-bot-dist.zip -d $HOME/workflow/
+cd $HOME/workflow/daily-bot-dist
 
 # 2. 安装 Node.js（如未安装）
 echo -e "${YELLOW}[2/6] 检查 Node.js 环境...${NC}"
@@ -71,32 +71,33 @@ echo "后端已启动: http://localhost:3001/api/health"
 
 # 6. 配置 Nginx
 echo -e "${YELLOW}[6/6] 配置 Nginx 反向代理...${NC}"
-sudo tee /etc/nginx/conf.d/workflow.conf > /dev/null << 'NGINX'
+APP_ROOT=$(pwd)
+sudo tee /etc/nginx/conf.d/workflow.conf > /dev/null << NGINX
 server {
     listen 80;
     server_name _;
 
-    root /home/user/daily-bot-dist/frontend;
+    root ${APP_ROOT}/frontend;
     index index.html;
 
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml;
 
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files \$uri \$uri/ /index.html;
     }
 
     location /api/ {
         proxy_pass http://localhost:3001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
     location /avatars/ {
         proxy_pass http://localhost:3001/avatars/;
-        proxy_set_header Host $host;
+        proxy_set_header Host \$host;
     }
 }
 NGINX
