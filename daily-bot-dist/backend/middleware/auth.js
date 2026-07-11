@@ -25,4 +25,3 @@ export function adminOnly(req, res, next) {
     }
     next();
 }
-//# sourceMappingURL=auth.js.map

@@ -32,4 +32,3 @@ router.get('/reports', async (req, res, next) => {
     }
 });
 export default router;
-//# sourceMappingURL=dashboard.js.map

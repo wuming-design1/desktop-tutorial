@@ -15,4 +15,3 @@ db.pragma('foreign_keys = ON');
 //  WAL 模式提升性能
 db.pragma('journal_mode = WAL');
 console.log('✅ 数据库连接已建立:', env.DB_PATH);
-//# sourceMappingURL=database.js.map

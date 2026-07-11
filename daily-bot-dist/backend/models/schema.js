@@ -35,4 +35,3 @@ export function initDatabase() {
   `);
     console.log('✅ 数据库表初始化完成');
 }
-//# sourceMappingURL=schema.js.map

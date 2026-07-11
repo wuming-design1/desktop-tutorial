@@ -47,4 +47,3 @@ export function listAllUsers() {
 export function countAdmins() {
     return db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'admin'").get();
 }
-//# sourceMappingURL=userModel.js.map

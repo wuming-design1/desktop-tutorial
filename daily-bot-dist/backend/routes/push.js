@@ -36,4 +36,3 @@ router.post('/send', async (req, res, next) => {
     }
 });
 export default router;
-//# sourceMappingURL=push.js.map

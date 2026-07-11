@@ -249,4 +249,3 @@ export async function createPRFromStaging(userId, options) {
     const pr = await createPR(owner, repoName, options.title, options.body, headBranch, baseBranch, token);
     return { ...pr, branch: headBranch, files: stagedFiles };
 }
-//# sourceMappingURL=githubService.js.map

@@ -120,4 +120,3 @@ export async function getReports(userId) {
     ];
     return { commitTrend, prTrend, taskDistribution, memberActivity, healthStatus };
 }
-//# sourceMappingURL=dashboardService.js.map

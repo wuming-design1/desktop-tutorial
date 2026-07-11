@@ -152,4 +152,3 @@ router.post('/avatar/default', authMiddleware, (req, res, next) => {
     }
 });
 export default router;
-//# sourceMappingURL=auth.js.map

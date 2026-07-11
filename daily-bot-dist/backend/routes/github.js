@@ -80,4 +80,3 @@ router.post('/pr/staging', async (req, res, next) => {
     }
 });
 export default router;
-//# sourceMappingURL=github.js.map

@@ -19,4 +19,3 @@ if (!parsed.success) {
     process.exit(1);
 }
 export const env = parsed.data;
-//# sourceMappingURL=env.js.map

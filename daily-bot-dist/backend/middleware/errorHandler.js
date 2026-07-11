@@ -14,4 +14,3 @@ export function errorHandler(err, _req, res, _next) {
     console.error('❌ 未捕获错误:', err);
     res.status(500).json({ error: '服务器内部错误' });
 }
-//# sourceMappingURL=errorHandler.js.map

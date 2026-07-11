@@ -61,4 +61,3 @@ export function getUserPlatforms(userId) {
         .all(userId);
     return rows.map(r => r.platform);
 }
-//# sourceMappingURL=credentialModel.js.map

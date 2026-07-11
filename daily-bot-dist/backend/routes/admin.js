@@ -76,4 +76,3 @@ router.get('/users', adminAuthMiddleware, (_req, res) => {
     res.json({ total: users.length, users });
 });
 export default router;
-//# sourceMappingURL=admin.js.map

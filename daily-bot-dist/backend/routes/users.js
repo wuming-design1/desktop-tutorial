@@ -50,4 +50,3 @@ router.patch('/:email/role', (req, res, next) => {
     }
 });
 export default router;
-//# sourceMappingURL=users.js.map

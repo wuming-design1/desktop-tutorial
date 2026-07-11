@@ -18,4 +18,3 @@ export function extractToken(authHeader) {
         return null;
     return authHeader.slice(7);
 }
-//# sourceMappingURL=jwt.js.map

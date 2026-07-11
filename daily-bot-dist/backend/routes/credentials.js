@@ -60,4 +60,3 @@ router.delete('/:platform', (req, res) => {
     res.json({ success: true });
 });
 export default router;
-//# sourceMappingURL=credentials.js.map

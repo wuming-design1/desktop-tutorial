@@ -19,4 +19,3 @@ export function decrypt(encrypted) {
     const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
     return decrypted.toString('utf8');
 }
-//# sourceMappingURL=encryption.js.map

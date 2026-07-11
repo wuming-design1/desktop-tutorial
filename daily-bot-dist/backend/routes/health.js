@@ -30,4 +30,3 @@ router.get('/ready', (_req, res) => {
     res.json({ ready: true });
 });
 export default router;
-//# sourceMappingURL=health.js.map
